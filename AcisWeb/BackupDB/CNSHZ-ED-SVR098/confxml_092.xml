@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<head version="2.5">
+    <host hostip="localhost" port="8008"></host>
+    <debug start="false"/>
+    <fileSystem xfs="true"/>
+    <filter start="false">
+	<exclude expression="(.*)\.svn"></exclude>
+	<exclude expression="^info/*"></exclude>
+	<exclude expression="^static/*"></exclude>
+    </filter>
+    <inotify>
+	<delete start="true"/>
+	<createFolder start="true"/>
+	<createFile start="false"/>
+	<closeWrite start="true"/>
+	<moveFrom start="true"/>
+	<moveTo start="true"/>
+	<attrib start="false"/>
+	<modify start="false"/>
+    </inotify>
+
+    <sersync>
+	<localpath watch="/ACIS_DB_BACKUP">
+	    <remote ip="10.22.52.223" name="backup"/><!-- server 092 -->
+	</localpath>
+	<rsync>
+	    <commonParams params="-artuz"/>
+	    <auth start="true" users="root" passwordfile="/etc/rsync_passwd"/>
+	    <userDefinedPort start="true" port="888"/><!-- port=874 -->
+	    <timeout start="true" time="100"/><!-- timeout=100 -->
+	    <ssh start="false"/>
+	</rsync>
+	<failLog path="/tmp/rsync_fail_log.sh" timeToExecute="60"/><!--default every 60mins execute once-->
+	<crontab start="true" schedule="720"><!--600mins-->
+	    <crontabfilter start="false">
+		<exclude expression="*.php"></exclude>
+		<exclude expression="info/*"></exclude>
+	    </crontabfilter>
+	</crontab>
+	<plugin start="false" name="command"/>
+    </sersync>
+
+    <plugin name="command">
+	<param prefix="/bin/sh" suffix="" ignoreError="true"/>	
+	<filter start="false">
+	    <include expression="(.*)\.php"/>
+	    <include expression="(.*)\.sh"/>
+	</filter>
+    </plugin>
+</head>
