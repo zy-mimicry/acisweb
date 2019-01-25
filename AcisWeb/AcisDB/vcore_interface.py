@@ -214,36 +214,6 @@ class AutoJenkinsProvider(vcore.Provider):
 
     @property
     def formatted_rawdata(self):
-        return self.get_data()
-
-class JenkinsProvider(vcore.Provider):
-
-    from .rex_debug.test_cookies_of_rex import (
-        test_get_jenkins_data_first,
-        test_get_jenkins_data_second,
-        test_get_jenkins_data_third,
-    )
-
-    self_test = {
-        "first" : test_get_jenkins_data_first,
-        "second" : test_get_jenkins_data_second,
-        "third" : test_get_jenkins_data_third,
-    }
-
-    def __init__(self, platform, test_version):
-        self.platform = platform
-        self.test_version = test_version
-
-    def get_data(self):
-        t = JenkinsProvider.self_test[self.test_version](self.platform)
-
-        logger_to_jenkins = logging.getLogger(__name__ + '.from_jenkins')
-        logger_to_jenkins.info(pformat(t))
-
-        return t
-
-    @property
-    def formatted_rawdata(self):
         """
         For Jenkins Test Data:
         NOTE: For jenkins data, ONLY one element for list.

@@ -16,7 +16,6 @@ from .vcore_interface import (IntegrationExtractor,
                               DefaultExtractor,
                               ExcelProvider,
                               JiraProvider,
-                              JenkinsProvider,
                               AutoJenkinsProvider)
 
 import logging
@@ -152,7 +151,8 @@ def do_save_jira(platform, jira_server_addr, jira_user, jira_passwd):
 
 
 def do_save_jenkins(platform, test_report_file):
-    vcore.splitter('save', provider=JenkinsProvider(platform, test_report_file))
+    pass
+    # vcore.splitter('save', provider=JenkinsProvider(platform, test_report_file))
 
 supported_cmds = {
     'save_excel_data'  : do_save_excel,

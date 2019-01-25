@@ -27,6 +27,7 @@ urlpatterns = [
     path('SDX55_default_index/', views.ERD_SDX55_index, name = "ERD_SDX55_index"),
 
     path('columns_data_select/', views.columns_data_select, name = 'columns_data_select'),
+    path('actions/', views.actions_dispatcher,   name = "actions"),
 
     path('commands/', views.commands, name = "commands"),
     path('help/',     views.help,     name = "help"),
@@ -37,8 +38,6 @@ urlpatterns = [
 
     path('query_new/',    views.query_new,    name = "query_new"),
     path('query_new/switch/',    views.query_new_switch,    name = "query_new"),
-
-    path('actions/', views.actions_dispatcher,   name = "actions"),
 
     path('jenkins_handler/', views.jenkins_handler, name = "jenkins_handler"),
 ]
