@@ -40,7 +40,8 @@ def ERD_9X40_index(request):
     out = de.ext_snapshot('9X40')
     return render(request, 'LigerUI/ACIS/ERD_page.htm', {'cookies' : json.dumps(out)})
 
-def ERD_SD55_index(request):
+
+def ERD_SDX55_index(request):
 
     de = DefaultExtractor(['SD55'])
     vcore.splitter('pick_all', extractor = de )
@@ -98,16 +99,6 @@ def query_new_switch(request):
         platform = request.GET.get('platform')
         action = request.GET.get('action')
 
-        # 'integration_query_exactly',
-        # 'night_regression_query',
-        # 'ERD_caselist_query',
-        # 'casename_query',
-        #q = Query('integration_query_exactly', platform= 'SD55', fw_version="SWI9X28A_00.11.01.06", test_date="2019-02-03")
-        # q = Query('integration_query_exactly', platform= 'SD55', fw_version="SWI9X28A_00.11.01.06", test_date="2019-01-03")
-        # q = Query('night_regression_query', platform= 'SD55', test_date="2019-01-03")
-        # q = Query('ERD_caselist_query', platform= 'SD55', ERD_ID="04.60.26")
-        # q = Query('casename_query', platform= 'SD55', casename = "test_case_03_alpha_02")
-
         def integration_test_get_cookies(query_cookies):
             UIout = []
             out = {}
@@ -152,14 +143,16 @@ def query_new_switch(request):
             return HttpResponseNotFound("<h2> Please input 'platform' and 'action' togather.</h2>")
 
 
-def do_save_excel():
-    vcore.splitter('save', provider = ExcelProvider())
+def do_save_excel(platform, version, erd_excel_file):
+    vcore.splitter('save', provider=ExcelProvider(platform, version, erd_excel_file))
 
-def do_save_jira():
-    vcore.splitter('save', provider = JiraProvider())
 
-def do_save_jenkins():
-    vcore.splitter('save', provider = JenkinsProvider())
+def do_save_jira(platform, jira_server_addr, jira_user, jira_passwd):
+    vcore.splitter('save', provider=JiraProvider(platform, jira_server_addr, jira_user, jira_passwd))
+
+
+def do_save_jenkins(platform, test_report_file):
+    vcore.splitter('save', provider=JenkinsProvider(platform, test_report_file))
 
 supported_cmds = {
     'save_excel_data'  : do_save_excel,
@@ -171,10 +164,19 @@ def commands(request):
     return render(request, 'LigerUI/ACIS/commands.htm', {'cmds' : list(supported_cmds.keys())})
 
 def actions_dispatcher(request):
-    for name, cmd in request.GET.items():
-        if name == "command":
-            if cmd and cmd in supported_cmds:
-                supported_cmds[cmd]()
+    if request.method == 'GET':
+        parameters = request.GET
+    elif request.method == 'POST':
+        parameters = request.POST
+
+    if parameters:
+        if parameters['command'] == 'save_erd_data':
+            do_save_excel(parameters['platform'], parameters['ErdVersion'], parameters['erd_excel_file'])
+        elif parameters['command'] == 'save_jira_data':
+            do_save_jira(parameters['platform'],
+                         parameters['jira_address'],
+                         parameters['jira_user'],
+                         parameters['jira_passwd'])
     return HttpResponseRedirect("/commands/")
 
 

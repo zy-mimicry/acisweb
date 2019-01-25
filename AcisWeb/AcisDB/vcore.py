@@ -355,7 +355,9 @@ class ExcelDataProcesser(CookiesProcesser):
                      'description',
                      'product_priority',
                      'author',
-                     'version')
+                     'version',
+                     'project',
+                     'component')
 
     def __init__(self, PLATFORM, ERD_ID, cookies = None, ERD_model = Erds, FW_VERSION = "unused"):
         self.platform = PLATFORM
@@ -592,7 +594,6 @@ class JiraDataProcesser(CookiesProcesser):
                                 if tr.fw_version == latest_tr.fw_version:
                                     same_ver_sub_trl.append(tr)
 
-                            combin_tr = None
                             if len(same_ver_sub_trl) > 1:
                                 combin_tr = max(same_ver_sub_trl, key = lambda tr: tr.test_date)
                             else: # count == 1

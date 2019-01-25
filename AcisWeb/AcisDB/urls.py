@@ -15,11 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
-
 from . import views
-
-from .rex_debug import views_of_rex
-from .shwu_debug import views_of_shw
 
 app_name = 'AcisDB'
 
@@ -28,7 +24,7 @@ urlpatterns = [
 
     path('9X28_default_index/', views.ERD_9X28_index, name = "ERD_9X28_index"),
     path('9X40_default_index/', views.ERD_9X40_index, name = "ERD_9X40_index"),
-    path('SD55_default_index/', views.ERD_SD55_index, name = "ERD_SD55_index"),
+    path('SDX55_default_index/', views.ERD_SDX55_index, name = "ERD_SDX55_index"),
 
     path('columns_data_select/', views.columns_data_select, name = 'columns_data_select'),
 
@@ -45,17 +41,4 @@ urlpatterns = [
     path('actions/', views.actions_dispatcher,   name = "actions"),
 
     path('jenkins_handler/', views.jenkins_handler, name = "jenkins_handler"),
-
-    # >Debug Page of rex<
-    path('rex_home/',     views_of_rex.rex_home,     name = 'rex_home'),
-    path('rex_commands/', views_of_rex.rex_commands, name = 'rex_commands'),
-    path('rex_prompt/', views_of_rex.rex_prompt, name = 'rex_prompt'),
-
-    path('test_query/', views_of_rex.rex_test_query, name = 'query_test'),
-
-    path('rex_actions/',  views_of_rex.rex_actions_dispatcher,   name = 'rex_actions'),
-    path('rex_show_actions/',  views_of_rex.rex_show_actions_dispatcher,   name = 'rex_show_actions'),
-
-    # >Debug Page of shwu<
-    path('shw_home/',     views_of_shw.shw_home, name = 'shw_home'),
 ]

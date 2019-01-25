@@ -3,15 +3,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title>ACIS Home Page</title>
-	  <meta http-equiv="X-UA-Compatible" content="IE=8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=8"/>
     <link href="../../LigerUI/lib/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css">
     <link href="../../LigerUI/lib/ligerUI/skins/Gray/css/all.css" rel="stylesheet" type="text/css">
     <link href="../../LigerUI/lib/ligerUI/skins/ligerui-icons.css" rel="stylesheet" type="text/css">
     <link href="../../LigerUI/lib/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css" />
     <link href="../../LigerUI/lib/ligerUI/skins/Gray2014/css/all.css" rel="stylesheet" />
-
     <script src="../../LigerUI/lib/jquery/jquery-1.9.0.min.js" type="text/javascript"></script>
-
     <script src="../../LigerUI/lib/jquery-validation/jquery.validate.min.js"></script>
     <script src="../../LigerUI/lib/jquery-validation/jquery.metadata.js"></script>
     <script src="../../LigerUI/lib/jquery-validation/messages_cn.js"></script>
@@ -34,29 +32,12 @@
     <script src="../../LigerUI/demos/grid/CustomersData.js" type="text/javascript"></script>
 
     <script type="text/javascript">
-     $.ligerDefaults.Filter.operators['string'] =
-         $.ligerDefaults.Filter.operators['text'] =
-             ["like" , "equal", "notequal", "startwith", "endwith" ];
-
-     var myvar = {Rows:[{"CustomerID":"ALFKI",
-                         "CompanyName":"Alfreds Futterkiste",
-                         "ContactName":"Maria Anders",
-                         "ContactTitle":"Sales Representative",
-                         "Address":"Obere Str. 57",
-                         "City":"Berlin",
-                         "Region":null,
-                         "PostalCode":"12209",
-                         "Country":"Germany",
-                         "Phone":"030-0074321",
-                         "Fax":"030-0076545"}]};
-
      var cookies = {{ cookies|safe }};
      var liger_cookies = {Rows:cookies};
 
      $.ligerDefaults.Filter.operators['string'] = $.ligerDefaults.Filter.operators['text'] = [
             "like" , "equal", "notequal", "startwith", "endwith" ];
-     $(function ()
-     {
+    $(function (){
          jira_head = 'https://issues.sierrawireless.com/browse/';
          window['g'] =
              $("#maingrid4").ligerGrid({
@@ -120,7 +101,7 @@
                            return out;
                        },
                      },
-                     { display: 'ERD-Tickets',
+                     { display: 'ERD-Level-Tickets',
                        columns:
                        [
                            { display: 'L1-Ticket', name: 'l1_jira', minWidth: 140, align: 'center',
@@ -163,8 +144,8 @@
                        },
                      },
                      { display: 'Description', name: 'description', minWidth: 300, align: 'center'},
-                     { display: 'Category', name: 'category', minWidth: 120, align: 'center' },
-                     { display: 'Title', name: 'title', minWidth: 120, align: 'center' },
+                    { display: 'Category', name: 'category', minWidth: 120, align: 'center', hide:true },
+                    { display: 'Title', name: 'title', minWidth: 120, align: 'center', hide:true },
                      { display: 'Version', name: 'version', minWidth: 120 ,heightAlign: 'center',
                        render: function (rowData,value)
                        {
@@ -189,7 +170,7 @@
                      },
                      { display: 'HLD', name: 'HLD', minWidth: 150, align: 'center' },
                      { display: 'Status', name: 'status', minWidth: 100, align: 'center' },
-                     { display: 'Author', name: 'author', minWidth: 120, align: 'center' },
+                   { display: 'Author', name: 'author', minWidth: 120, align: 'center', hide:true },
                      { display: 'Platform', name: 'platform', minWidth: 70, align: 'center' },
                      { display: 'WorkLoad', name: 'workload', minWidth: 70, align: 'center' },
                      { display: 'Milestone', name: 'milestone', minWidth: 70, align: 'center' },
@@ -215,6 +196,7 @@
                  width: '100%',
                  height: '100%',
                  alternatingRow: false,
+                 pageSize:200,
                  pageSizeOptions: [200, 300, 400,500],
                  enabledSort : true,
                  sortName:'ERD_ID',
@@ -239,11 +221,16 @@
                          return '< Milestone >  [ Items have NOT yet joined Milestone ]  (Count=' + groupdata.length + ')';
                      }
                  },
-                 /* rowAttrRender: function (rowdata){ */
-                 /* if (rowdata.status == "DONE"){ */
-                 /* return "style='background:Chartreuse;'"; */
-                 /* } */
-                 /* }, */
+               rowAttrRender: function (rowdata){
+                   if (rowdata.status == "CLOSED"){
+                      for (obj in rowData.test_result){
+                          if (rowData.test_result[obj][result] == "failed"){
+                              return "style='background:Tomato;'";
+                          }
+                      }
+                       return "style='background:Chartreuse;'";
+                   }
+               },
              });
          $("#pageloading").hide();
 

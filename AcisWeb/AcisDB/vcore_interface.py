@@ -8,31 +8,17 @@ from pprint import pprint as pp, pformat
 import logging,re,os
 
 from . import vcore
-from . import log
+from AcisDB import erd_excel_retrieve, jira_scan
 
 class ExcelProvider(vcore.Provider):
 
-    from .rex_debug.test_cookies_of_rex import (
-        test_get_excel_data_first,
-        test_get_excel_data_second,
-        test_get_excel_data_third,
-        test_get_excel_data_fourth,
-    )
-
-    self_test = {
-            "first" : test_get_excel_data_first,
-            "second" : test_get_excel_data_second,
-            "third" : test_get_excel_data_third,
-            "fourth" : test_get_excel_data_fourth,
-    }
-
-    def __init__(self,platform = "SD55", test_version = "first"):
-
+    def __init__(self, platform, version, erd_excel_file):
         self.platform = platform
-        self.test_version = test_version
+        self.test_version = version
+        self.erd_file = erd_excel_file
 
     def get_data(self):
-        t = ExcelProvider.self_test[self.test_version](self.platform)
+        t = erd_excel_retrieve.read_excel(self.erd_file, self.platform, self.test_version)
 
         logger_to_excel = logging.getLogger(__name__ + '.from_excel')
         logger_to_excel.info(pformat(t))
@@ -63,26 +49,17 @@ class ExcelProvider(vcore.Provider):
         """
         return self.get_data()
 
+
 class JiraProvider(vcore.Provider):
 
-    from .rex_debug.test_cookies_of_rex import (
-        test_get_jira_data_first,
-        test_get_jira_data_second,
-        test_get_jira_data_third,
-    )
-
-    self_test = {
-        "first" : test_get_jira_data_first,
-        "second" : test_get_jira_data_second,
-        "third" : test_get_jira_data_third,
-    }
-
-    def __init__(self, platform, test_version):
+    def __init__(self, platform, jira_server_addr, jira_user, jira_passwd):
         self.platform = platform
-        self.test_version = test_version
+        self.jira_server_addr = jira_server_addr
+        self.jira_user = jira_user
+        self.jira_pwd = jira_passwd
 
     def get_data(self):
-        t = JiraProvider.self_test[self.test_version](self.platform)
+        t = jira_scan.retrieve_new_feature_jiras(self.jira_server_addr, self.jira_user, self.jira_user, self.platform)
 
         logger_to_jira = logging.getLogger(__name__ + '.from_jira')
         logger_to_jira.info(pformat(t))
@@ -121,14 +98,13 @@ class JiraProvider(vcore.Provider):
         """
         return self.get_data()
 
+
 class AutoJenkinsProvider(vcore.Provider):
 
     def __init__(self, result_path):
         self.result_path = result_path
 
-
     def get_log_files(self, path):
-
         if not os.path.isdir(path):
             raise TypeError
 
@@ -212,9 +188,7 @@ class AutoJenkinsProvider(vcore.Provider):
         return record
 
     def translate_element(self, files, record):
-
         out = []
-
         once_dict ={'jenkins'  : {'IR_casetree' : {}}}
 
         any=0
@@ -345,7 +319,6 @@ class DefaultExtractor(vcore.Extractor):
         for d in data:
             tmp_out = {}
 
-            ERD_ID = d
             others = data[d]
 
             if not others['excel']: continue
@@ -470,5 +443,4 @@ class DefaultExtractor(vcore.Extractor):
                 tmp_out['test_report'] = []
 
             out.append(tmp_out)
-
         return out

@@ -85,8 +85,14 @@ WSGI_APPLICATION = 'AcisWeb.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        #'ENGINE': 'django.db.backends.sqlite3',
+        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'ACIS_DB',
+        'USER': 'root',
+        'PASSWORD': '1234',
+        'HOST': 'CNSHZ-ED-SVR098',
+        'PORT': '3306',
     }
 }
 

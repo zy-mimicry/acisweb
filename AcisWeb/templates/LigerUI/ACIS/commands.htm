@@ -9,9 +9,7 @@
     <link href="../../LigerUI/lib/ligerUI/skins/ligerui-icons.css" rel="stylesheet" type="text/css">
     <link href="../../LigerUI/lib/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css" />
     <link href="../../LigerUI/lib/ligerUI/skins/Gray2014/css/all.css" rel="stylesheet" />
-
     <script src="../../LigerUI/lib/jquery/jquery-1.9.0.min.js" type="text/javascript"></script>
-
     <script src="../../LigerUI/lib/jquery-validation/jquery.validate.min.js"></script>
     <script src="../../LigerUI/lib/jquery-validation/jquery.metadata.js"></script>
     <script src="../../LigerUI/lib/jquery-validation/messages_cn.js"></script>
@@ -29,24 +27,62 @@
     <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerCheckBox.js" type="text/javascript"></script>
     <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerComboBox.js" type="text/javascript"></script>
     <script src="../../LigerUI/lib/ligerUI/js/ligerui.all.js"></script>
-
     <script src="../../LigerUI/demos/filter/ligerGrid.showFilter.js" type="text/javascript"></script>
     <script src="../../LigerUI/demos/grid/CustomersData.js" type="text/javascript"></script>
 
     <script type="text/javascript">
-     // var supported_cmds = {{ cmds|safe }}
+        $(function () {
+           $("#sync_type").change(function () {
+               $("#DynamicAdd").html("")
+                if ($(this).val() == "save_erd_data") {
+                    ErdVersion = "<label>ERD Version:</label>\n" +
+                        "        <br />\n" +
+                        "        <input type=\"text\" name='ErdVersion'/>\n" +
+                        "        <br />"  +
+                        "<label>ERD Excel file:</label>\n" +
+                        "        <br />\n" +
+                        "        <input type=\"text\" name='erd_excel_file'/>\n" +
+                        "        <br />";
+                    $("#DynamicAdd").html(ErdVersion);
+                } else if($(this).val() == "save_jira_data"){
+                    jira_info = "<label>JIRA Server Address</label>\n" +
+                            "<br />\n" +
+                            "<input type=\"text\" name='jira_address' />\n" +
+                            "<br />\n" +
+                            "<label>JIRA User</label>\n" +
+                            "<br />\n" +
+                            "<input type=\"text\" name='jira_user' />\n" +
+                            "<br />\n" +
+                            "<label>JIRA Password</label>\n" +
+                            "<br />\n" +
+                            "<input type=\"password\" name='jira_passwd' />\n" +
+                            "<br />\n";
+                    $("#DynamicAdd").html(jira_info);
+                } else if($(this).val() == "save_jenkins_data"){
+                    jenkins_info = ""
+                    $("#DynamicAdd").html(jenkins_info);
+                }
+           });
+        });
     </script>
 
 </head>
 <body style="padding:10px">
     <h2>ACIS Supported Commands List</h2>
     <form action="/actions" target="_self">
-        <select name="command" >
+        <select name="command" id="sync_type">
             <option value="" >Please select command:</option>
-            <option value="save_excel_data" >Save Excel Data</option>
+            <option value="save_erd_data" >Save Erd Data</option>
             <option value="save_jira_data" >Save JIRA Data</option>
             <option value="save_jenkins_data" >Save Jenkins Data</option>
         </select>
+        <br />
+        <label>Platform</label>
+        <br />
+        <input type="text" name='platform' />
+        <br />
+        <div id='DynamicAdd'> </div>
+        <br />
         <input type="submit" value="submit" />
     </form>
 </body>
