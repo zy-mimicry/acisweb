@@ -17,6 +17,8 @@ from django.contrib import admin
 from django.urls import path,include
 from . import views
 
+from .rex_debug import views_of_rex
+
 app_name = 'AcisDB'
 
 urlpatterns = [
@@ -27,17 +29,30 @@ urlpatterns = [
     path('SDX55_default_index/', views.ERD_SDX55_index, name = "ERD_SDX55_index"),
 
     path('columns_data_select/', views.columns_data_select, name = 'columns_data_select'),
-    path('actions/', views.actions_dispatcher,   name = "actions"),
+    path('actions/', views.actions_dispatcher, name = "actions"),
 
     path('commands/', views.commands, name = "commands"),
-    path('help/',     views.help,     name = "help"),
-    path('about/',    views.about,    name = "about"),
+    path('help/', views.help, name = "help"),
+    path('about/', views.about, name = "about"),
 
-    path('query/',    views.query,    name = "query"),
-    path('query/switch/', views.query_switch,  name = "switch"),
+    path('query/', views.query, name = "query"),
+    path('query/switch/', views.query_switch, name = "switch"),
 
-    path('query_new/',    views.query_new,    name = "query_new"),
-    path('query_new/switch/',    views.query_new_switch,    name = "query_new"),
+    path('test_report_query/',    views.test_report_query_enter,    name = "test_report_query"),
+    path('test_report_query/switch/',    views.test_report_query,    name = "test_report_query_switch"),
 
     path('jenkins_handler/', views.jenkins_handler, name = "jenkins_handler"),
+
+    path('campaign/', views.campaign, name = "latest_campaign"),
+    path('campaign_index/', views.campaign_index, name = "campaign_index"),
+    path('campaign_query/', views.campaign_query, name = "campaign_query"),
+
+    path('snapshot/', views.snapshot, name = "latest_snapshot"),
+    path('snapshot_index/', views.snapshot_index, name = "snapshot_index"),
+    path('snapshot_query/', views.snapshot_query, name = "snapshot_query"),
+    path('snapshot_store/', views.snapshot_store, name = "snapshot_store"),
+
+    # debug
+    path('rex_show_actions/', views_of_rex.rex_show_actions_dispatcher, name = "rex_debug"),
+    path('rex_prompt/', views_of_rex.rex_prompt, name = "rex_prompt"),
 ]

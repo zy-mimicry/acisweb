@@ -74,7 +74,6 @@
             <option value="" >Please select command:</option>
             <option value="save_erd_data" >Save Erd Data</option>
             <option value="save_jira_data" >Save JIRA Data</option>
-            <option value="save_jenkins_data" >Save Jenkins Data</option>
         </select>
         <br />
         <label>Platform</label>
@@ -83,6 +82,36 @@
         <br />
         <div id='DynamicAdd'> </div>
         <br />
+        <input type="submit" value="submit" />
+    </form>
+
+    <form action="/rex_show_actions" target="_self">
+        <select name="command" >
+            <option value="" >Please select command:</option>
+            <option value="do_step_01" >-step 01- IMPORT FIRST EDITION ERD TABLE</option>
+            <option value="do_step_02" >-step 02- UPDATE ALL JIRA TICKET FOR FIRST EDITION</option>
+            <option value="do_step_03" >-step 03- DO ALPHA01 DEVELOP</option>
+            <option value="do_step_04" >-step 04- I-TEST ALPHA01 TESTCASEs</option>
+
+            <option value="do_step_05" >-step 05- UPDATE EXCEL TABLE -n 5 & m 2 - </option>
+            <option value="do_step_06" >-step 06- UPDATE JIRA DATA FOR CHANGE - n 5 & m 2-</option>
+            <option value="do_step_07" >-step 07- I-TEST ALPHA01 TESTCASEs -more- </option>
+
+            <option value="do_step_08" >-step 08- DO ALPHA02 DEVELOP</option>
+            <option value="do_step_09" >-step 09- I-TEST ALPHA02 TESTCASEs</option>
+
+            <option value="do_step_10" >-step 10- UPDATE EXCEL TABLE - n 3 & d 2 -</option>
+            <option value="do_step_11" >-step 11- UPDATE JIRA DATA FOR CHANGE - n 3 & d 2 -</option>
+            <option value="do_step_12" >-step 12- I-TEST ALPHA02 TESTCASEs -more- </option>
+
+            <option value="do_step_13" >-step 13- DO ALPHA03 DEVELOP</option>
+            <option value="do_step_14" >-step 14- I-TEST ALPHA03 TESTCASEs</option>
+
+            <option value="do_step_15" >-step 15- UPDATE EXCEL TABLE - n 5 & a 1 -</option>
+            <option value="do_step_16" >-step 16- UPDATE JIRA DATA FOR CHANGE - n 5 & a 1 -</option>
+            <option value="do_step_17" >-step 17- I-TEST ALPHA03 TESTCASEs -more-</option>
+            <option value="do_step_18" >-step 18- DIFF TEST and COMBIN</option>
+        </select>
         <input type="submit" value="submit" />
     </form>
 </body>

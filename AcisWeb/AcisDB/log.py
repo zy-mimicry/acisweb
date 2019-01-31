@@ -11,6 +11,10 @@ DEBUG_LOG_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '
 if not os.path.exists(DEBUG_LOG_ROOT):
     os.makedirs(DEBUG_LOG_ROOT)
 
+DB_income_traceback_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/DB_income_traceback/'
+if not os.path.exists(DB_income_traceback_dir):
+    os.makedirs(DB_income_traceback_dir)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -20,7 +24,7 @@ LOGGING = {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
         },
         'simple': {
-            'format': '%(levelname)s %(message)s'
+            'format': '<%(name)s> [%(asctime)s] %(message)s'
         },
         'pure': {
             'format': '%(name)s %(message)s'
@@ -28,6 +32,14 @@ LOGGING = {
     },
 
     'handlers': {
+        'income_tb_file' : {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename':  os.path.join(DB_income_traceback_dir, 'income_tb.log'),
+            'maxBytes': 1024 * 1024 * 100,  # 1024*1024*100 B (100MB).
+            'backupCount': 100,             # keep at most 100 log files.
+            'formatter': 'simple',
+        },
 
         'console': {
             'level': 'DEBUG',
@@ -118,6 +130,11 @@ LOGGING = {
             'handlers': ['pick_all'],
             'level': 'DEBUG',
             'propagate': False,
+        },
+        'AcisDB.vcore.income_tracebacker' : {
+            'handlers' : ['income_tb_file'],
+            'level' : 'DEBUG',
+            'propagate' : False,
         },
 
     },

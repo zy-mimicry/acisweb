@@ -43,6 +43,8 @@ class ExcelProvider(vcore.Provider):
         >>>     'author' : "",
         >>>     'version' : "",
         >>>     'platform' : "",
+        >>>     'project' : "",
+        >>>     'component' : "",
         >>> }
         >>> ...
         >>> ]
@@ -59,7 +61,7 @@ class JiraProvider(vcore.Provider):
         self.jira_pwd = jira_passwd
 
     def get_data(self):
-        t = jira_scan.retrieve_new_feature_jiras(self.jira_server_addr, self.jira_user, self.jira_user, self.platform)
+        t = jira_scan.retrieve_new_feature_jiras(self.jira_server_addr, self.jira_user, self.jira_pwd, self.platform)
 
         logger_to_jira = logging.getLogger(__name__ + '.from_jira')
         logger_to_jira.info(pformat(t))
@@ -132,7 +134,7 @@ class AutoJenkinsProvider(vcore.Provider):
             'test_log'       : 5,
             'test_ir_report' : 6,
 
-            'product'        : 1,
+            'product'        : 1, # same as project
             'fw_version'     : 2,
         }
 
@@ -251,6 +253,8 @@ class AutoJenkinsProvider(vcore.Provider):
         return self.get_data()
 
 
+
+
 class IntegrationExtractor(vcore.Extractor):
 
     @property
@@ -334,18 +338,7 @@ class DefaultExtractor(vcore.Extractor):
             if lastest_ver == "":
                 continue
 
-            # print("versions : {}".format(versions))
-            # print("sub_versions : {}".format(sub_versions))
-            # print("minor version : {}".format(minor_ver))
-            # print("latest version : {}".format(lastest_ver))
-
             tmp_out['version'] = {}
-
-            #for sv in sub_versions:
-            #    if others['excel'][sv]['description'] == 'blank':
-            #        tmp_out['version'][sv] = 'deactive'
-            #    else:
-            #        tmp_out['version'][sv] = 'active'
 
             versions_list_string = ''
             for sv in sub_versions:

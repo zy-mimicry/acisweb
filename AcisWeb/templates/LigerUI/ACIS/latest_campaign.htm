@@ -1,0 +1,35 @@
+
+{% if latest_list %}
+<h2>Latest Test Campaign List</h2>
+
+<ul>
+    {% for cam in latest_list %}
+    <li> <a href="/campaign_index/?platform={{cam.platform}}&fw_version={{cam.fw_version}}&test_date={{cam.test_date}}&description={{cam.description}}"> {{ cam }} </a> </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p> No Campaign Show </p>
+{% endif %}
+
+<br />
+<br />
+<br />
+<br />
+
+<h2> Test Campaign Query </h2>
+<form action="/campaign_query" target="_self">
+    <label> FW version: </label>
+    <br />
+    <input type="text" name='fw_version' />
+    <br />
+    <label> Test Date:  </label>
+    <br />
+    <input type="text" name='test_date' />
+    <br />
+    <label> Description:  </label>
+    <br />
+    <input type="text" name='description' />
+    <br />
+
+    <input type="submit" value="submit" />
+</form>

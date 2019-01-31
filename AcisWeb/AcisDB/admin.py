@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Erds,TestCases,TestReports
+from .models import Erds,TestCases,TestReports,TestCampaign,ProjectSnapshot
 
 # Register your models here.
 # admin.site.register(Erds)
@@ -17,5 +17,13 @@ class TestCasesModelAdmin(VersionAdmin):
     pass
 
 @admin.register(TestReports)
+class TestReportsModelAdmin(VersionAdmin):
+    pass
+
+@admin.register(TestCampaign)
+class TestReportsModelAdmin(VersionAdmin):
+    pass
+
+@admin.register(ProjectSnapshot)
 class TestReportsModelAdmin(VersionAdmin):
     pass

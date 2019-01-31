@@ -6,7 +6,7 @@
     <META HTTP-EQUIV="Cache-Control"CONTENT="no-cache" />
     <META HTTP-EQUIV="Expires"CONTENT="0" />
 	  <meta http-equiv="X-UA-Compatible" content="IE=8"/>
-    <title>PRI System for Product Configuration Team</title>
+    <title>ACIS WebSite :BSP TEAM:</title>
     <link rel="icon" href="/LigerUI/swi.ico" type="image/x-icon"/>
     <link href="../LigerUI/lib/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" id="mylink"/>
@@ -481,22 +481,22 @@
     <div id="pageloading"></div>
     <div id="topmenu" class="l-topmenu">
         <div class="l-topmenu-logo">
-            PRI System for Product Configuration Team
+            ACIS WebSite :BSP TEAM:
             | Menu:
             <input type='button' onclick='tab.removeAll();' value='Close All Tab'/>
             <input type='button' onclick='f_open_innewwin();' value=' Open In NewWin '/>
-            <input type='button' onclick='f_getTab_filter();' value=' Query '/>
-            <select id="op_menu"  style='width:200px;'>
-                <option value="">Please select your operation:</option>
-            </select>
-            search: <input type='text' onclick='f_getTab_updatefuzzyqnquiry();' value='' id='selFuzzyEnquiry' onkeyup='mykeypress_fuzzyqnquiry();' style='width:200px;' title="search Ticket Id should include '-' as preText, example: [-8427], searh special column should be [Components:Ar755]" />
+            <!-- <input type='button' onclick='f_getTab_filter();' value=' Query '/> -->
+            <!-- <select id="op_menu"  style='width:200px;'> -->
+            <!-- <option value="">Please select your operation:</option> -->
+            <!-- </select> -->
+            <!-- search: <input type='text' onclick='f_getTab_updatefuzzyqnquiry();' value='' id='selFuzzyEnquiry' onkeyup='mykeypress_fuzzyqnquiry();' style='width:200px;' title="search Ticket Id should include '-' as preText, example: [-8427], searh special column should be [Components:Ar755]" /> -->
         </div>
         <div class="l-topmenu-welcome">
             <a href="#" class="l-link2"" onclick="$.ligerDialog.open({ title:'PRI_System login',width: 400,height: 300,url: '/login/' });;return false;">login</a>
             <span class="space">|</span>
             <a href="#" class="l-link2" onclick="$.ligerDialog.confirm('Do you want to logout?','Tips', function (yes) { if (yes) $.ligerDialog.open({ title:'PRI_System login',width: 400,height: 300,url: '/login/?op=logout' }); });return false;return false;">login out</a>
             <span class="space">|</span>
-            <span style="color:#eeeeee">Only Support </span><a href="../LigerUI/tools/ChromeStandaloneSetup64.exe" >Chrome</a>
+            <!-- <span style="color:#eeeeee">Only Support </span><a href="../LigerUI/tools/ChromeStandaloneSetup64.exe" >Chrome</a> -->
         </div>
     </div>
 
@@ -518,7 +518,9 @@
                             </li>
 
                             <li><span><a href="javascript:f_addTab('Query','Query','/query/')">Query</a></span></li>
-                            <li><span><a href="javascript:f_addTab('Query_new','Query_new','/query_new/')">Query New</a></span></li>
+                            <li><span><a href="javascript:f_addTab('test_report_query','test_report_query','/test_report_query/')">Test Report Query</a></span></li>
+                            <li><span><a href="javascript:f_addTab('Campaign', 'Campaign','/campaign/')">Test Campaign</a></span></li>
+                            <li><span><a href="javascript:f_addTab('Snapshot', 'Snapshot','/snapshot/')">Project Snapshot</a></span></li>
                             <li><span><a href="javascript:f_addTab('Commands','Commands','/commands/')">Commands</a></span></li>
 
                             <li><span><a href="javascript:f_addTab('Help','Help','/help/')">Help</a></span></li>

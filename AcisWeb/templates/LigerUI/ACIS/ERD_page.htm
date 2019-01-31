@@ -35,9 +35,23 @@
      var cookies = {{ cookies|safe }};
      var liger_cookies = {Rows:cookies};
 
+     function isEmptyObject(e) {
+         var t;
+         for (t in e)
+             return !1;
+         return !0;
+     }
+
+     var any = 0
+     var platform = ""
+     if (! isEmptyObject(cookies)){
+         platform = cookies[any].platform;
+     }
+
      $.ligerDefaults.Filter.operators['string'] = $.ligerDefaults.Filter.operators['text'] = [
-            "like" , "equal", "notequal", "startwith", "endwith" ];
-    $(function (){
+         "like" , "equal", "notequal", "startwith", "endwith" ];
+
+     $(function (){
          jira_head = 'https://issues.sierrawireless.com/browse/';
          window['g'] =
              $("#maingrid4").ligerGrid({
@@ -144,8 +158,8 @@
                        },
                      },
                      { display: 'Description', name: 'description', minWidth: 300, align: 'center'},
-                    { display: 'Category', name: 'category', minWidth: 120, align: 'center', hide:true },
-                    { display: 'Title', name: 'title', minWidth: 120, align: 'center', hide:true },
+                     { display: 'Category', name: 'category', minWidth: 120, align: 'center', hide:true },
+                     { display: 'Title', name: 'title', minWidth: 120, align: 'center', hide:true },
                      { display: 'Version', name: 'version', minWidth: 120 ,heightAlign: 'center',
                        render: function (rowData,value)
                        {
@@ -153,14 +167,14 @@
                            if (rowData.version) {
                                ul_f = '<ul>';
                                ul_b = '</ul>';
-                              var versions = rowData.version.split(",").splice(0, (rowData.version.split(",").length - 1));
-                              for (i in versions){
-                                  /* alert(i) */
-                                  version = versions[i].split("-")
-                                  if (version[1] == 'deactive'){
-                                      out += '<li> <STRIKE> [' + version[0] + ']</STRIKE> </li>';
-                                  }else{
-                                      out += '<li> [' + version[0] + '] </li>';
+                               var versions = rowData.version.split(",").splice(0, (rowData.version.split(",").length - 1));
+                               for (i in versions){
+                                   /* alert(i) */
+                                   version = versions[i].split("-")
+                                   if (version[1] == 'deactive'){
+                                       out += '<li> <STRIKE> [' + version[0] + ']</STRIKE> </li>';
+                                   }else{
+                                       out += '<li> [' + version[0] + '] </li>';
                                    }
                                }
                                out = ul_f + out + ul_b;
@@ -170,7 +184,7 @@
                      },
                      { display: 'HLD', name: 'HLD', minWidth: 150, align: 'center' },
                      { display: 'Status', name: 'status', minWidth: 100, align: 'center' },
-                   { display: 'Author', name: 'author', minWidth: 120, align: 'center', hide:true },
+                     { display: 'Author', name: 'author', minWidth: 120, align: 'center', hide:true },
                      { display: 'Platform', name: 'platform', minWidth: 70, align: 'center' },
                      { display: 'WorkLoad', name: 'workload', minWidth: 70, align: 'center' },
                      { display: 'Milestone', name: 'milestone', minWidth: 70, align: 'center' },
@@ -188,7 +202,12 @@
                          text: 'Column View',
                          click: f_open,
                          icon: 'view'
-                     }
+                     },
+                     {
+                         text: 'SnapShot',
+                         click: do_snapshot,
+                         icon: 'search2'
+                     },
                  ]},
                  fixedCellHeight: false,
                  pageSize: 200,
@@ -221,16 +240,16 @@
                          return '< Milestone >  [ Items have NOT yet joined Milestone ]  (Count=' + groupdata.length + ')';
                      }
                  },
-               rowAttrRender: function (rowdata){
-                   if (rowdata.status == "CLOSED"){
-                      for (obj in rowData.test_result){
-                          if (rowData.test_result[obj][result] == "failed"){
-                              return "style='background:Tomato;'";
-                          }
-                      }
-                       return "style='background:Chartreuse;'";
-                   }
-               },
+                 rowAttrRender: function (rowdata){
+                     if (rowdata.status == "CLOSED"){
+                         for (obj in rowData.test_result){
+                             if (rowData.test_result[obj][result] == "failed"){
+                                 return "style='background:Tomato;'";
+                             }
+                         }
+                         return "style='background:Chartreuse;'";
+                     }
+                 },
              });
          $("#pageloading").hide();
 
@@ -243,256 +262,262 @@
              {
                  columns_data.push(
                      {
-                        text:column.name,
-                        id:column.name
-                    });
-                    columns_all=columns_all+(columns_all?';':'')+column.name;
+                         text:column.name,
+                         id:column.name
+                     });
+                 columns_all=columns_all+(columns_all?';':'')+column.name;
 
-                    if (column.hide!=true)
-                    {
-                        columns_ids=columns_ids+(columns_ids?';':'')+column.name;
-                    }
-
+                 if (column.hide!=true)
+                 {
+                     columns_ids=columns_ids+(columns_ids?';':'')+column.name;
                  }
-             });
-            f_open_data={
-                winwidth:540,
-                winheight:420,
-                checkbox:[
-                    {
-                        name:'Column',
-                        text:columns_all,
-                        value:columns_ids,
-                        ctrl:'selcolumn'
-                    },
-                ],
-            };
-            f_open_init(f_open_data);
-        });
 
-        function itemclick()
-        {
-            g.options.data = $.extend(true,{}, liger_cookies);
-            g.showFilter();
-        }
+             }
+         });
+         f_open_data={
+             winwidth:540,
+             winheight:420,
+             checkbox:[
+                 {
+                     name:'Column',
+                     text:columns_all,
+                     value:columns_ids,
+                     ctrl:'selcolumn'
+                 },
+             ],
+         };
+         f_open_init(f_open_data);
+     });
+     function do_snapshot()
+     {
+         if (confirm("Save this snapshot, are your sure ?")) {
+             $.get('/snapshot_store/', {'platform_list' : platform});
+         }
+     }
 
-        function f_save_checkin()
-        {
-            var txt = ""
-            var rows = g.getCheckedRows();
-            $(rows).each(function ()
-            {
-                txt += this.id + ",";
-            });
-            return txt
-        };
+     function itemclick()
+     {
+         g.options.data = $.extend(true,{}, liger_cookies);
+         g.showFilter();
+     }
 
-        function f_open_init(dialogData)
-        {
-            check_list = dialogData.checkbox;
+     function f_save_checkin()
+     {
+         var txt = ""
+         var rows = g.getCheckedRows();
+         $(rows).each(function ()
+         {
+             txt += this.id + ",";
+         });
+         return txt
+     };
 
-            htmltext=''
-            for(var id in check_list)
-            {
-                if (check_list[id].ctrl) {
-                    ctrl=check_list[id].ctrl;
-                    if ($('#'+ctrl+'').length>0)
-                    {
-                        $('#'+ctrl+'').val(check_list[id].value);
-                    }
-                    else
-                    {
-                        htmltext=htmltext+'\n<input type="hidden" id="'+ctrl+'" value="'+check_list[id].value+'">'
-                    }
-                }
-            }
-            check_list = dialogData.inputbox;
-            for(var id in check_list)
-            {
-                if (check_list[id].ctrl)
-                {
-                    ctrl=check_list[id].ctrl;
-                    if ($('#'+ctrl+'').length>0)
-                    {
-                        $('#'+ctrl+'').val(check_list[id].value);
-                    }
-                    else
-                    {
-                        htmltext=htmltext+'\n<input type="hidden" id="'+ctrl+'" value="'+check_list[id].value+'">'
-                    }
-                }
-            }
-            if (htmltext)
-                $('#sel_hidden_fields').html(htmltext);
-        }
-        function f_open_option(dialogData)
-        {
-            params={};
-            filter_keys='';
-            check_list = dialogData.checkbox;
-            for(var id in check_list)
-            {
-                if (check_list[id].ctrl && check_list[id].column)
-                {
-                    ctrl=check_list[id].ctrl;
-                    column=check_list[id].column;
-                    method=check_list[id].method;
-                    if ('__iregex'==method)
-                    {
-                        filter_keys=filter_keys+(filter_keys?',':'')+column+method;
-                        params[column]=$('#'+ctrl+'').val().replace(/;/g,'|');
-                    }
-                    else if (method)
-                    {
-                        filter_keys=filter_keys+(filter_keys?',':'')+column+method;
-                        params[column]=$('#'+ctrl+'').val();
-                    }
-                    else
-                    {
-                        params[column]=$('#'+ctrl+'').val();
-                    }
-                }
-            }
-            Fuzzy_Enquiry_cols='';
-            check_list = dialogData.inputbox;
-            for(var id in check_list)
-            {
-                if (check_list[id].ctrl && check_list[id].column)
-                {
-                    ctrl=check_list[id].ctrl;
-                    column=check_list[id].column;
-                    columns=column.split(';');
-                    if (columns.length>1)
-                    {
-                        Fuzzy_Enquiry_cols=Fuzzy_Enquiry_cols+(Fuzzy_Enquiry_cols?' and ':'')+'('+column.replace(/;/g,' or ')+')';
-                    }
-                    method=check_list[id].method;
-                    for(var c in columns)
-                    {
-                        column=columns[c];
-                        if ('__iregex'==method)
-                        {
-                            filter_keys=filter_keys+(filter_keys?',':'')+column+method;
-                            params[column]=$('#'+ctrl+'').val().replace(/;/g,'|');
-                        }
-                        else if (method)
-                        {
-                            filter_keys=filter_keys+(filter_keys?',':'')+column+method;
-                            params[column]=$('#'+ctrl+'').val();
-                        }
-                        else
-                        {
-                            params[column]=$('#'+ctrl+'').val();
-                        }
-                    }
+     function f_open_init(dialogData)
+     {
+         check_list = dialogData.checkbox;
 
-                }
-            }
-            if (params.filter_fmls && Fuzzy_Enquiry_cols)
-            {
-                params['filter_fmls']=params['filter_fmls']+' and ' +Fuzzy_Enquiry_cols;
-            }
-            else if (!params.filter_fmls && Fuzzy_Enquiry_cols)
-            {
-                params['filter_fmls']=Fuzzy_Enquiry_cols;
-            }
-            params['filter_keys']=filter_keys;
-            return params;
-        }
+         htmltext=''
+         for(var id in check_list)
+         {
+             if (check_list[id].ctrl) {
+                 ctrl=check_list[id].ctrl;
+                 if ($('#'+ctrl+'').length>0)
+                 {
+                     $('#'+ctrl+'').val(check_list[id].value);
+                 }
+                 else
+                 {
+                     htmltext=htmltext+'\n<input type="hidden" id="'+ctrl+'" value="'+check_list[id].value+'">'
+                 }
+             }
+         }
+         check_list = dialogData.inputbox;
+         for(var id in check_list)
+         {
+             if (check_list[id].ctrl)
+             {
+                 ctrl=check_list[id].ctrl;
+                 if ($('#'+ctrl+'').length>0)
+                 {
+                     $('#'+ctrl+'').val(check_list[id].value);
+                 }
+                 else
+                 {
+                     htmltext=htmltext+'\n<input type="hidden" id="'+ctrl+'" value="'+check_list[id].value+'">'
+                 }
+             }
+         }
+         if (htmltext)
+             $('#sel_hidden_fields').html(htmltext);
+     }
+     function f_open_option(dialogData)
+     {
+         params={};
+         filter_keys='';
+         check_list = dialogData.checkbox;
+         for(var id in check_list)
+         {
+             if (check_list[id].ctrl && check_list[id].column)
+             {
+                 ctrl=check_list[id].ctrl;
+                 column=check_list[id].column;
+                 method=check_list[id].method;
+                 if ('__iregex'==method)
+                 {
+                     filter_keys=filter_keys+(filter_keys?',':'')+column+method;
+                     params[column]=$('#'+ctrl+'').val().replace(/;/g,'|');
+                 }
+                 else if (method)
+                 {
+                     filter_keys=filter_keys+(filter_keys?',':'')+column+method;
+                     params[column]=$('#'+ctrl+'').val();
+                 }
+                 else
+                 {
+                     params[column]=$('#'+ctrl+'').val();
+                 }
+             }
+         }
+         Fuzzy_Enquiry_cols='';
+         check_list = dialogData.inputbox;
+         for(var id in check_list)
+         {
+             if (check_list[id].ctrl && check_list[id].column)
+             {
+                 ctrl=check_list[id].ctrl;
+                 column=check_list[id].column;
+                 columns=column.split(';');
+                 if (columns.length>1)
+                 {
+                     Fuzzy_Enquiry_cols=Fuzzy_Enquiry_cols+(Fuzzy_Enquiry_cols?' and ':'')+'('+column.replace(/;/g,' or ')+')';
+                 }
+                 method=check_list[id].method;
+                 for(var c in columns)
+                 {
+                     column=columns[c];
+                     if ('__iregex'==method)
+                     {
+                         filter_keys=filter_keys+(filter_keys?',':'')+column+method;
+                         params[column]=$('#'+ctrl+'').val().replace(/;/g,'|');
+                     }
+                     else if (method)
+                     {
+                         filter_keys=filter_keys+(filter_keys?',':'')+column+method;
+                         params[column]=$('#'+ctrl+'').val();
+                     }
+                     else
+                     {
+                         params[column]=$('#'+ctrl+'').val();
+                     }
+                 }
 
-        function f_open()
-        {
-            $.ligerDialog.open({
-                height:f_open_data.winheight,//380,
-                width: f_open_data.winwidth,//400,
-                title : 'Please Select the Column',
-                url: '/columns_data_select',
-                showMax: false,
-                showToggle: true,
-                showMin: false,
-                isResize: true,
-                slide: false,
-                onClose :function (item, dialog) { if (this.frame.isdirty) {f_toggleex();}},
-                onLoaded :function (item, dialog) { this.frame.set_dialog(this);},
-                buttons:[
-                    { text:'OK',
-                        onclick:function (item, dialog) {
-                            dialog.frame.f_ok();
-                            //f_toggleex();
-                            //dialog.close();
-                        }},
-                    { text: 'CLOSE', onclick: function (item, dialog) {dialog.close();}},
-                    ],
-                data:f_open_data,
-            });
-        }
+             }
+         }
+         if (params.filter_fmls && Fuzzy_Enquiry_cols)
+         {
+             params['filter_fmls']=params['filter_fmls']+' and ' +Fuzzy_Enquiry_cols;
+         }
+         else if (!params.filter_fmls && Fuzzy_Enquiry_cols)
+         {
+             params['filter_fmls']=Fuzzy_Enquiry_cols;
+         }
+         params['filter_keys']=filter_keys;
+         return params;
+     }
 
-        function f_toggleex()
-        {
-            f_toggle($("#selcolumn").val(),columns_all);
-            search('first');
-        }
-        function f_toggle(columns_sel,columns_all)
-        {
-            $("#selcolumn").val(columns_sel);
-            nmes=columns_all.split(';');
-            sels=columns_sel.split(';');
+     function f_open()
+     {
+         $.ligerDialog.open({
+             height:f_open_data.winheight,//380,
+             width: f_open_data.winwidth,//400,
+             title : 'Please Select the Column',
+             url: '/columns_data_select',
+             showMax: false,
+             showToggle: true,
+             showMin: false,
+             isResize: true,
+             slide: false,
+             onClose :function (item, dialog) { if (this.frame.isdirty) {f_toggleex();}},
+             onLoaded :function (item, dialog) { this.frame.set_dialog(this);},
+             buttons:[
+                 { text:'OK',
+                   onclick:function (item, dialog) {
+                       dialog.frame.f_ok();
+                       //f_toggleex();
+                       //dialog.close();
+                   }},
+                 { text: 'CLOSE', onclick: function (item, dialog) {dialog.close();}},
+             ],
+             data:f_open_data,
+         });
+     }
 
-            for (i=0,leni=nmes.length;i<leni;i++)
-            {
-                isshow=false;
-                for (j=0,lenj=sels.length;j<lenj;j++)
-                {
-                    if (nmes[i]==sels[j])
-                    {
-                        isshow=true;break;
-                    }
-                }
-                g.toggleCol(nmes[i], isshow);
-            }
-        }
+     function f_toggleex()
+     {
+         f_toggle($("#selcolumn").val(),columns_all);
+         search('first');
+     }
+     function f_toggle(columns_sel,columns_all)
+     {
+         $("#selcolumn").val(columns_sel);
+         nmes=columns_all.split(';');
+         sels=columns_sel.split(';');
 
-        function myextend(des, src, override)
-        {
-            if(src instanceof Array)
-            {
-                for(var i = 0, len = src.length; i < len; i++)
-                    extend(des, src[i], override);
-            }
-            for( var i in src)
-            {
-                if(override || !(i in des))
-                {
-                    des[i] = src[i];
-                }
-            }
-            return des;
-        }
-        var select_ids='';
-        function search(ctype, op)
-        {
-            select_ids = f_save_checkin();
-            var params = {
-                            sortorder:g.options.sortOrder,
-                            sortname:g.options.sortName,
-                            page: g.options.page,
-                            pagesize:g.options.pageSize
-            };
-            f_open_params=f_open_option(f_open_data);
-                        //myalertjson(f_open_params);
-            params=myextend(f_open_params,params);
+         for (i=0,leni=nmes.length;i<leni;i++)
+         {
+             isshow=false;
+             for (j=0,lenj=sels.length;j<lenj;j++)
+             {
+                 if (nmes[i]==sels[j])
+                 {
+                     isshow=true;break;
+                 }
+             }
+             g.toggleCol(nmes[i], isshow);
+         }
+     }
 
-            g.setOptions({parms : params});
-            g.loadServerData(params);
-            if (ctype)
-                g.changePage(ctype);
-        }
-        var intclock=0;
+     function myextend(des, src, override)
+     {
+         if(src instanceof Array)
+         {
+             for(var i = 0, len = src.length; i < len; i++)
+                 extend(des, src[i], override);
+         }
+         for( var i in src)
+         {
+             if(override || !(i in des))
+             {
+                 des[i] = src[i];
+             }
+         }
+         return des;
+     }
+     var select_ids='';
+     function search(ctype, op)
+     {
+         select_ids = f_save_checkin();
+         var params = {
+             sortorder:g.options.sortOrder,
+             sortname:g.options.sortName,
+             page: g.options.page,
+             pagesize:g.options.pageSize
+         };
+         f_open_params=f_open_option(f_open_data);
+         //myalertjson(f_open_params);
+         params=myextend(f_open_params,params);
 
-        function goodbye()
-        {
-            self.clearInterval(intclock);
-        }
+         g.setOptions({parms : params});
+         g.loadServerData(params);
+         if (ctype)
+             g.changePage(ctype);
+     }
+     var intclock=0;
+
+     function goodbye()
+     {
+         self.clearInterval(intclock);
+     }
     </script>
     <style type="text/css">
         .l-grid-row-cell,  .l-grid-hd-cell {

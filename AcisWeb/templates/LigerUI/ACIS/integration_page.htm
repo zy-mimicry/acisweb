@@ -9,9 +9,7 @@
     <link href="../../LigerUI/lib/ligerUI/skins/ligerui-icons.css" rel="stylesheet" type="text/css">
     <link href="../../LigerUI/lib/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css" />
     <link href="../../LigerUI/lib/ligerUI/skins/Gray2014/css/all.css" rel="stylesheet" />
-
     <script src="../../LigerUI/lib/jquery/jquery-1.9.0.min.js" type="text/javascript"></script>
-
     <script src="../../LigerUI/lib/jquery-validation/jquery.validate.min.js"></script>
     <script src="../../LigerUI/lib/jquery-validation/jquery.metadata.js"></script>
     <script src="../../LigerUI/lib/jquery-validation/messages_cn.js"></script>
@@ -29,7 +27,6 @@
     <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerCheckBox.js" type="text/javascript"></script>
     <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerComboBox.js" type="text/javascript"></script>
     <script src="../../LigerUI/lib/ligerUI/js/ligerui.all.js"></script>
-
     <script src="../../LigerUI/demos/filter/ligerGrid.showFilter.js" type="text/javascript"></script>
     <script src="../../LigerUI/demos/grid/CustomersData.js" type="text/javascript"></script>
 
@@ -37,18 +34,6 @@
      $.ligerDefaults.Filter.operators['string'] =
          $.ligerDefaults.Filter.operators['text'] =
              ["like" , "equal", "notequal", "startwith", "endwith" ];
-
-     var myvar = {Rows:[{"CustomerID":"ALFKI",
-                         "CompanyName":"Alfreds Futterkiste",
-                         "ContactName":"Maria Anders",
-                         "ContactTitle":"Sales Representative",
-                         "Address":"Obere Str. 57",
-                         "City":"Berlin",
-                         "Region":null,
-                         "PostalCode":"12209",
-                         "Country":"Germany",
-                         "Phone":"030-0074321",
-                         "Fax":"030-0076545"}]};
 
      var cookies = {{ cookies|safe }};
      var liger_cookies = {Rows:cookies};

@@ -72,10 +72,39 @@ class TestReports(models.Model):
     IR_report_path = models.TextField()
     fw_version = models.CharField(max_length=50)
     note = models.TextField(null=True)
-    description = models.CharField(max_length=100) # test_type
+    description = models.CharField(max_length=100)  # test_type
 
     test_case = models.ForeignKey("TestCases", on_delete=models.CASCADE)
 
     def __str__(self):
         display = "< " + self.fw_version + "_" + self.description + "_" + self.test_date + "_" +  "TestCase_" + str(self.test_case) + " >"
+        return display
+
+class TestCampaign(models.Model):
+    """
+    Each Test triggered by Jenkins server should be a unified form.
+    NOTE: This form is used as a jump table and is not associated with other forms.
+    """
+
+    platform    = models.CharField(max_length=20)
+    fw_version  = models.CharField(max_length=50)
+    description = models.TextField()
+    test_date   = models.CharField(max_length=30)
+
+    def __str__(self):
+        display = "< {}_{}_{} >".format(self.fw_version, self.description, self.test_date)
+        return display
+
+class ProjectSnapshot(models.Model):
+    """
+    Snapshot
+    """
+
+    platform = models.CharField(max_length=20)
+    date = models.CharField(max_length=30)
+    snap = models.BinaryField()
+    tag  = models.TextField()
+
+    def __str__(self):
+        display = "< {}_{}_{} >".format(self.platform, self.date, self.tag)
         return display

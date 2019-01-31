@@ -8,12 +8,12 @@ Views Core Models-DB Engine
 from django.shortcuts import render,render_to_response
 from django.http import HttpResponse,HttpResponseRedirect
 from django.db.models import Q
-import json,time,threading,copy
+import json,time,threading,copy,random,heapq,pickle
 from pprint import pprint as pp, pformat
 import collections
 from collections import defaultdict
 
-from .models import Erds,TestCases,TestReports
+from .models import Erds,TestCases,TestReports,TestCampaign,ProjectSnapshot
 
 import logging
 from . import log
@@ -21,6 +21,7 @@ from . import log
 mutex = threading.Lock()
 
 vlog = logging.getLogger(__name__).info
+tb_log = logging.getLogger(__name__ + '.income_tracebacker').info
 
 DB_UPDATE = False
 
@@ -93,6 +94,8 @@ class Provider:
         >>>     'author' : "",
         >>>     'version' : "",
         >>>     'platform' : "",
+        >>>     'project' : "",
+        >>>     'component' : "",
         >>> } ...
         >>> ]
 
@@ -128,6 +131,9 @@ class Provider:
 
         For Jenkins Test Data:
         NOTE: For jenkins data, ONLY one element for list.
+
+        Description:
+        IR_report_path - Integration or Regression Test report path.
 
         >>> [{
         >>>     "PLATFORM" : "",
@@ -216,6 +222,9 @@ def splitter(action, provider = None, extractor = None):
              'UIform'   : UiFormDataProcesser}
 
     if action == 'save':
+        db_name = "ACIS_DB"
+        tp_record = []
+
         if not provider:
             vlog("[provider] does NOT exist."); return
 
@@ -224,9 +233,23 @@ def splitter(action, provider = None, extractor = None):
             ERD_ID = cookie.get('ERD_ID', "unused")
 
             for tp in cookie:
-                if tp in types and cookie[tp]:
+                try:
                     mutex.acquire()
-                    types[tp](PLATFORM, ERD_ID, cookies = cookie[tp]).doit(action)
+                    if tp in types and cookie[tp]:
+                        # mutex.acquire()
+                        types[tp](PLATFORM, ERD_ID, cookies = cookie[tp]).doit(action)
+                        # mutex.release()
+                except Exception as e:
+                    vlog("> &_& Save action of [{tp}] occurs exception, reason: [{reason}]".format(tp=tp, reason=e.args))
+                    #raise
+                else:
+                    if tp in types and tp not in tp_record:
+                        tb_log('Data from [{type_of_data}] to the DB [{db}]'.format(type_of_data=tp, db = db_name))
+                        tp_record.append(tp)
+                    # Jenkins data just once (save).
+                    if tp in types and tp == "jenkins" and cookie[tp]:
+                        TestCampaignDealer().save(cookie)
+                finally:
                     mutex.release()
 
         if get_update_db_flag() is False:
@@ -712,32 +735,17 @@ class JenkinsDataProcesser(CookiesProcesser):
         # print("recored : lastest_version_objs")
         # pp(lastest_version_objs)
 
+        ANY_MATCHED = False
         for obj in lastest_version_objs.values():
             tcl = obj.testcases_set.all()
             for tc in tcl:
                 if tc.case_name in self.cookies['IR_casetree']:
-                    print("******************************************** tr add.")
                     tc.testreports_set.create(**self.cookies['IR_casetree'][tc.case_name]).save()
                     time.sleep(0.1)
+                    ANY_MATCHED = True
 
-                    # trl = tc.testreports_set.all()
-                    # fw_versions_map = { tr.fw_version : tr for tr in trl}
-                    # pp(fw_versions_map)
-                    # # if self.FW_VERSION not in fw_versions_map:
-                    # if self.cookies['IR_casetree'][tc.case_name]['fw_version'] not in fw_versions_map:
-                    #     print("Different fw_version newing ...")
-                    #     # assert False, "rex want"
-                    #     tc.testreports_set.create(**self.cookies['IR_casetree'][tc.case_name]).save()
-                    #     time.sleep(0.1)
-                    # else:
-                    #     print("same fw_version combin ...")
-                    #     # assert False, "rex want"
-                    #     t = fw_versions_map.get(self.cookies['IR_casetree'][tc.case_name]['fw_version'])
-                    #     case_item_dict = self.cookies['IR_casetree'][tc.case_name]
-                    #     for i in case_item_dict:
-                    #         t.__dict__[i] = case_item_dict[i]
-                    #     t.save()
-                    #     time.sleep(0.1)
+        if ANY_MATCHED is False:
+            raise Exception("TestCampaign test cases are not match to DB saved.")
 
     def pick_all(self):
         """
@@ -749,6 +757,8 @@ class JenkinsDataProcesser(CookiesProcesser):
                 'test_log' : "",
                 'test_date' : "",
                 'IR_report_path' : "",
+                'note' : "",
+                'description' : "",
                 },
             'ACIS_A_S_Test_Temp_ssss' : {
                 'erd_id' : "",
@@ -757,6 +767,8 @@ class JenkinsDataProcesser(CookiesProcesser):
                 'test_log' : "",
                 'test_date' : "",
                 'IR_report_path' : "",
+                'note' : "",
+                'description' : "",
             },
             'ACIS_A_S_Test_Temp_abcd' : {
                 'erd_id' : "",
@@ -765,6 +777,8 @@ class JenkinsDataProcesser(CookiesProcesser):
                 'test_log' : "",
                 'test_date' : "",
                 'IR_report_path' : "",
+                'note' : "",
+                'description' : "",
             },
         ... ...
         }
@@ -790,6 +804,8 @@ class JenkinsDataProcesser(CookiesProcesser):
                         'test_log' : latest_tr.test_log,
                         'test_date' : latest_tr.test_date,
                         'IR_report_path' : latest_tr.IR_report_path,
+                        # 'note' : "",
+                        # 'description' : "",
                     }
 
                     # out[tc.case_name] = {
@@ -849,25 +865,17 @@ class QueryArgsInvalid(Exception):
 
 class Query:
     supported_query = (
-        'integration_query_exactly',
-        'night_regression_query',
+        'test_report_query',
         'ERD_caselist_query',
         'casename_query',
     )
 
     def __init__(self, which_query, **kwargs):
-
         if which_query not in Query.supported_query:
             raise UnsupportedQuery("Query NOT be supported.")
 
-        if which_query == 'integration_query_exactly':
-            if {'platform', 'fw_version', 'test_date'} - kwargs.keys():
-                raise QueryArgsInvalid("[{}] can't get valid args.[{}]".format(which_query, kwargs))
-            self.valid_args = kwargs
-            self.which_query = which_query
-
-        elif which_query == 'night_regression_query':
-            if {'platform', 'test_date'} - kwargs.keys():
+        if which_query == 'test_report_query':
+            if {'platform', 'fw_version', 'start_test_date', 'end_test_date'} - kwargs.keys():
                 raise QueryArgsInvalid("[{}] can't get valid args.[{}]".format(which_query, kwargs))
             self.valid_args = kwargs
             self.which_query = which_query
@@ -884,157 +892,178 @@ class Query:
             self.valid_args = kwargs
             self.which_query = which_query
 
+    def test_report_filter(self, query_set):
+        fw_version = self.valid_args['fw_version'].strip()
+        start_test_date = self.valid_args['start_test_date'].strip()
+        end_test_date = self.valid_args['end_test_date'].strip()
+        # Set the filter
+        if start_test_date and end_test_date and fw_version:
+            test_report_filter = Q(test_date__gte=start_test_date) & Q(test_date__lte=end_test_date) & Q(
+                fw_version=fw_version)
+        elif start_test_date and end_test_date:
+            test_report_filter = Q(test_date__gte=start_test_date) & Q(test_date__lte=end_test_date)
+        elif start_test_date and fw_version:
+            test_report_filter = Q(test_date__lte=end_test_date) & Q(fw_version=fw_version)
+        elif end_test_date and fw_version:
+            test_report_filter = Q(test_date__lte=end_test_date) & Q(fw_version=fw_version)
+        elif start_test_date:
+            test_report_filter = Q(test_date__gte=start_test_date)
+        elif end_test_date:
+            test_report_filter = Q(test_date__lte=end_test_date)
+        elif fw_version:
+            test_report_filter = Q(fw_version=fw_version)
 
+        if not start_test_date and not end_test_date and not fw_version:
+            trl = query_set.testreports_set.all()
+        else:
+            trl = query_set.testreports_set.filter(test_report_filter)
 
-    def do_query(self):
+        return trl
 
-        if self.which_query == 'integration_query_exactly':
-            return self.integration_query_exactly(**self.valid_args)
-
-        elif self.which_query == 'night_regression_query':
-            return self.night_regression_query(**self.valid_args)
-
-        elif self.which_query == 'ERD_caselist_query':
-            return self.ERD_caselist_query(**self.valid_args)
-
-        elif self.which_query == 'casename_query':
-            return self.casename_query(**self.valid_args)
-
-
-
-    def integration_query_exactly(self, **kwargs):
-
+    def format_test_report(self, platform, erd_id, casename, test_report):
         out = {}
-
-        platform = kwargs['platform']
-        fw_version = kwargs['fw_version']
-        test_date = kwargs['test_date']
-        # print("fw_version : {}\ntest_date : {}".format(fw_version, test_date))
-
-        Q_filter_platform   = Q(platform = platform)
-        Q_filter_fw_version = Q(fw_version = fw_version)
-        Q_filter_test_date  = Q(test_date = test_date)
-
-        el = Erds.objects.filter(Q_filter_platform)
-
+        out['erd_id'] = erd_id
         out['platform'] = platform
-        out['Erds'] = {}
-
-        for e in el:
-            out['Erds'][e.erd_id] = {}
-            tcl = e.testcases_set.all()
-            for tc in tcl:
-                hit = 0 # only
-                trl = tc.testreports_set.filter(Q_filter_fw_version, Q_filter_test_date)
-                if trl:
-                    found_tr = trl[hit]
-                    out['Erds'][e.erd_id][tc.case_name] = {
-                        # 'erd_id' : e.erd_id,
-                        # 'test_log' : found_tr.test_log,
-                        'fw_version' : found_tr.fw_version,
-                        'test_result' : found_tr.test_result,
-                        'test_date' : found_tr.test_date,
-                        'IR_report_path' : found_tr.IR_report_path,
-                    }
-            if not out['Erds'][e.erd_id]:
-                del out['Erds'][e.erd_id]
-
+        out['case_name'] = casename
+        out['fw_version'] = test_report.fw_version
+        out['test_date'] = test_report.test_date
+        out['test_result'] = test_report.test_result
+        out['IR_report_path'] = test_report.IR_report_path
         return out
 
-    def night_regression_query(self, **kwargs):
+    def test_report_data(self):
+        ui_out = []
 
-        out = {}
-
-        platform = kwargs['platform']
-        test_date = kwargs['test_date']
-
-        Q_filter_platform   = Q(platform = platform)
-        Q_filter_test_date  = Q(test_date = test_date)
-
-        el = Erds.objects.filter(Q_filter_platform)
-
-        out['platform'] = platform
-        out['Erds'] = {}
+        platform = self.valid_args['platform'].strip()
+        Q_filter_platform = Q(platform=platform)
+        if self.which_query == "ERD_caselist_query":
+            ERD_ID = self.valid_args['ERD_ID'].strip()
+            erd_table_filter = Q(erd_id=ERD_ID) & Q_filter_platform
+        else:
+            erd_table_filter = Q_filter_platform
+        el = Erds.objects.filter(erd_table_filter)
 
         for e in el:
-            tcl = e.testcases_set.all()
+            if self.which_query == "casename_query":
+                casename = self.valid_args['casename'].strip()
+                tcl = e.testcases_set.all().filter(case_name=casename)
+            else:
+                tcl = e.testcases_set.all()
             for tc in tcl:
-                hit = 0 # only
-                trl = tc.testreports_set.filter(Q_filter_test_date)
-                if trl:
-                    out['Erds'][e.erd_id] = {}
-                    found_tr = trl[hit]
-                    out['Erds'][e.erd_id][tc.case_name] = {
-                        'fw_version' : found_tr.fw_version,
-                        'test_result' : found_tr.test_result,
-                        'test_date' : found_tr.test_date,
-                        'IR_report_path' : found_tr.IR_report_path,
-                    }
-        pp(out)
-        return out
-
-    def ERD_caselist_query(self, **kwargs):
-
-        out = {}
-
-        platform = kwargs['platform']
-        ERD_ID = kwargs['ERD_ID']
-
-        Q_filter_platform = Q(platform = platform)
-        Q_filter_erd_id   = Q(erd_id = ERD_ID)
-
-        # same ID
-        el = Erds.objects.filter(Q_filter_platform, Q_filter_erd_id)
-
-        out['platform'] = platform
-        out['ERD_ID'] = ERD_ID
-
-        case_list = { tc.case_name  for e in el for tc in e.testcases_set.all()}
-
-        out['Case_List']= {}
-        for casename in case_list:
-            out['Case_List'][casename] = []
-
-        for e in el:
-            tcl = e.testcases_set.all()
-            for tc in tcl:
-                trl = tc.testreports_set.all()
-                for tr in trl:
-                    out['Case_List'][tc.case_name].append(
-                        {
-                            'fw_version' : tr.fw_version,
-                            'test_date'  : tr.test_date,
-                            'test_result': tr.test_result,})
-
-        pp(out)
-        return out
-
-    def casename_query(self, **kwargs):
-
-        out = {}
-
-        platform = kwargs['platform']
-        casename = kwargs['casename']
-
-        Q_filter_platform = Q(platform = platform)
-
-        out['platform'] = platform
-        out[casename] = []
-
-        el = Erds.objects.filter(Q_filter_platform)
-
-        finder = {}
-
-        for e in el:
-            tcl = e.testcases_set.all()
-            for tc in tcl:
-                if tc.case_name == casename:
+                if self.which_query == 'test_report_query':
+                    trl = self.test_report_filter(tc)
+                else:
                     trl = tc.testreports_set.all()
-                    for tr in trl:
-                        out[casename].append({
-                            'fw_version' : tr.fw_version,
-                            'test_date'  : tr.test_date,
-                            'test_result': tr.test_result,})
 
-        pp(out)
+                for tr in trl:
+                    ui_out.append(self.format_test_report(platform, e.erd_id, tc.case_name, tr))
+
+        return ui_out
+
+
+class QueryMixin:
+
+    def query(self, ** query_keys):
+        """
+        This may not be a good implementation, but at least avoid duplicate code.
+        """
+
+        # Separate elements that are unique to each category.
+        if self.__class__.__name__ == "TestCampaignDealer":
+            supported_query_keys = {
+                'fw_version'  : 'fw_version__icontains',
+                'test_date'   : 'test_date__icontains',
+                'description' : 'description__icontains',
+            }
+            Model = TestCampaign
+            ordered_str = '-test_date'
+
+        elif self.__class__.__name__ == "SnapshotDealer":
+            supported_query_keys = {
+                'platform'  : 'platform__icontains',
+                'date'      : 'date__icontains',
+                'tag'       : 'tag__icontains',
+            }
+            Model = ProjectSnapshot
+            ordered_str = '-date'
+        else:
+            raise Exception("Query Mixin NOT support [{}] query".format(self.__class__.__name__))
+
+        # Don't want to match the whole word.
+        query_result_list = []
+
+        # if no args, query all objs in DB.
+        if not query_keys:
+            query_result_list = Model.objects.all().order_by(ordered_str)
+            return query_result_list
+
+        # filter out unsupport key-words.
+        match_supported_keys = {}
+        for key in query_keys:
+            if key in supported_query_keys:
+                match_supported_keys[supported_query_keys[key]] = query_keys[key]
+
+        # The contents of the parameters are not checked.
+        # If the contents do not match, there will be no query results.
+        query_result_list = Model.objects.filter(**match_supported_keys).order_by(ordered_str)
+
+        return query_result_list
+
+
+class TestCampaignDealer(QueryMixin):
+
+    def save(self, cookie):
+
+        if not cookie:
+            raise Exception("> &_& cookie is empty dict.")
+
+        to_save = {}
+        _, any = random.choice(list(cookie['jenkins']['IR_casetree'].items()))
+
+        to_save['fw_version'] = any['fw_version']
+        to_save['test_date'] = any['test_date']
+        to_save['platform'] = cookie['PLATFORM']
+        to_save['description'] = cookie['description']
+
+        TestCampaign(**to_save).save()
+
+        tb_log('Data from [{type_of_data}] to the table ({tb}) of  DB [{db}]'.format(type_of_data='Jenkins Test',
+                                                                                     tb='TestCampaign',
+                                                                                     db = 'ACIS_DB'))
+
+    def get_latest(self):
+
+        cl = TestCampaign.objects.all()
+        display_count = 5
+        latest_five_list = heapq.nlargest(display_count, cl, key = lambda c : c.test_date)
+        return latest_five_list
+
+class SnapshotDealer(QueryMixin):
+
+    def pickling(self, platform, any_obj, tag = "AutoSaveWeekly"):
+        s = ProjectSnapshot()
+        if not platform:
+            s.platform = "UNKNOW_PLATFORM"
+            vlog("unknow platform, maybe you should make sure that [cookies] of <ERD_page.htm> NOT empty.")
+        else:
+            s.platform = platform
+        s.tag  = tag
+        s.date = time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
+        s.snap = pickle.dumps(any_obj)
+        s.save()
+
+        tb_log('Data from [{type_of_data}] to the table ({tb}) of  DB [{db}]'.format(type_of_data='project view',
+                                                                                     tb='ProjectSnapshot',
+                                                                                     db = 'ACIS_DB'))
+
+    def unpickling(self, date, tag = "AutoSaveWeekly"):
+        sl = ProjectSnapshot.objects.filter(date=date, tag=tag)
+        only = 0
+        out = pickle.loads(sl[only].snap)
         return out
+
+    def get_latest(self):
+        sl = ProjectSnapshot.objects.all()
+        display_count = 5
+        latest_five_list = heapq.nlargest(display_count, sl, key = lambda s: s.date)
+        return latest_five_list
