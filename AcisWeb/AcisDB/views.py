@@ -69,14 +69,14 @@ def query(request):
 
 def query_switch(request):
     if request.method == "GET":
-        platform = request.GET.get('platform')
+        platform = request.GET.get('platform').upper()
         action = request.GET.get('action')
 
         if action == 'ERD_table_version':
             print("recored query:\n{}\n{}\n{}".format(platform,action,request.GET.get('ErdTableVersion')))
             erd_table_version = request.GET.get('ErdTableVersion')
 
-            de = DefaultExtractor([platform.upper()])
+            de = DefaultExtractor([platform])
             vcore.splitter('pick_all', extractor = de )
 
             out = de.ext_snapshot(platform = platform.upper(), spec_ver = erd_table_version)

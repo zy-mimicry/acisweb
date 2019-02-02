@@ -93,7 +93,9 @@ def read_excel(excel_file, platform, version):
     all_erds = []
     data = xlrd.open_workbook('AcisDB/erd_release/' + excel_file)
     table = data.sheet_by_name(u'Requirements')
-    revision_table = data.sheet_by_name(u'Title & Revision')
+
+    # Check if the erd version matched.
+    revision_table = data.sheet_by_name('Title & Revision')
     erd_revision_list = revision_table.col_values(revision_table_column)
     latest_version_index = erd_revision_list.index('BOTTOM_LINE: DO NOT DELETE')
     if erd_revision_list[latest_version_index - 1] != version:

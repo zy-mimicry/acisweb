@@ -66,7 +66,7 @@
                                ul_f = '<ul>';
                                ul_b = '</ul>';
                                for (obj in rowData.case_name){
-                                   out += '<li> [' + rowData.case_name[obj] + '] </li>';
+                                   out += "<li> <span style='color:black;font-weight:bold'> [" + rowData.case_name[obj] + ']</span></li>';
                                }
                                out = ul_f + out + ul_b;
                            }
@@ -86,14 +86,23 @@
                                ul_f = '<ul>';
                                ul_b = '</ul>';
                                for (obj in rowData.test_result){
-                                   out += '<li> [' + rowData.test_result[obj][casename] + ':' + rowData.test_result[obj][result] + '] </li>';
+                                   if (rowData.test_result[obj][result] == "PASS"){
+                                       result_str = "<span style='color:green;font-weight:bold'>" +
+                                                    rowData.test_result[obj][result] +
+                                                    "</span>";
+                                   }else{
+                                       result_str = "<span style='color:red;font-weight:bold'>" +
+                                                    rowData.test_result[obj][result] +
+                                                    "</span>";
+                                   }
+                                   out += '<li> [' + rowData.test_result[obj][casename] + ':' + result_str + '] </li>';
                                }
                                out = ul_f + out + ul_b;
                            }
                            return out;
                        },
                      },
-                     { display: 'TestReports', name: 'test_report', minWidth: 450, align: 'center',
+                     { display: 'TestReports', name: 'test_report', minWidth: 570, align: 'center',
                        render: function (rowData,value)
                        {
                            list_self = [];
@@ -105,38 +114,40 @@
 
                                for (obj in rowData.test_report){
                                    var casename = rowData.test_report[obj][0];
-                                   var fw_version = rowData.test_report[obj][1];
-                                   var report_path = rowData.test_report[obj][2];
+                                   var fw_version ="<span style='color:blue;font-weight:bold'>" +
+                                                   rowData.test_report[obj][1] +
+                                                   "</span>";
+                                   var test_date  ="<span style='color:maroon;font-weight:bold'>" +
+                                                   rowData.test_report[obj][2] +
+                                                   "</span>";
+                                   var report_path ="<a href='" +
+                                                    rowData.test_report[obj][3] +
+                                                    "' ><span style='color:gray;font-weight:bold'>Go-report</span></a>";
 
-                                   out += "<li> [" + casename + ':' + fw_version  + ':' + report_path + "] </li>";
+                                   out += "<li> [" + casename + ':' + fw_version  + ':' + test_date + ':' + report_path + "] </li>";
                                }
                                out = ul_f + out + ul_b;
                            }
                            return out;
                        },
                      },
-                     { display: 'ERD-Level-Tickets',
-                       columns:
-                       [
-                           { display: 'L1-Ticket', name: 'l1_jira', minWidth: 140, align: 'center',
-                             render: function (rowData,value)
-                             {
-                                 if (rowData.l1_jira){
-                                     link_me = "<a href='"+ jira_head + rowData.l1_jira +"' target=__blank>["+ rowData.l1_jira +"]</a>";
-                                     return link_me;
-                                 }
-                             },
-                           },
-                           { display: 'L2-Ticket', name: 'l2_jira', minWidth: 140, align: 'center',
-                             render: function (rowData,value)
-                             {
-                                 if (rowData.l2_jira){
-                                     link_me = "<a href='"+ jira_head + rowData.l2_jira +"' target=__blank>["+ rowData.l2_jira +"]</a>";
-                                     return link_me;
-                                 }
-                             },
-                           },
-                       ],
+                     { display: 'L1-Ticket', name: 'l1_jira', minWidth: 140, align: 'center',
+                       render: function (rowData,value)
+                       {
+                           if (rowData.l1_jira){
+                               link_me = "<a href='"+ jira_head + rowData.l1_jira +"' target=__blank>["+ rowData.l1_jira +"]</a>";
+                               return link_me;
+                           }
+                       },
+                     },
+                     { display: 'L2-Ticket', name: 'l2_jira', minWidth: 140, align: 'center',
+                       render: function (rowData,value)
+                       {
+                           if (rowData.l2_jira){
+                               link_me = "<a href='"+ jira_head + rowData.l2_jira +"' target=__blank>["+ rowData.l2_jira +"]</a>";
+                               return link_me;
+                           }
+                       },
                      },
                      { display: 'JIRA-BUG-Tickets', name: 'bug_jiras', minWidth: 200, align: 'center',
                        render: function (rowData,value)
@@ -188,6 +199,7 @@
                      { display: 'Platform', name: 'platform', minWidth: 70, align: 'center' },
                      { display: 'WorkLoad', name: 'workload', minWidth: 70, align: 'center' },
                      { display: 'Milestone', name: 'milestone', minWidth: 70, align: 'center' },
+                     { display: 'Component', name: 'component', minWidth: 70, align: 'center' },
                  ],
                  //data: $.extend(true,{},CustomersData),
                  //data: $.extend(true,{}, myvar),
@@ -241,13 +253,15 @@
                      }
                  },
                  rowAttrRender: function (rowdata){
-                     if (rowdata.status == "CLOSED"){
-                         for (obj in rowData.test_result){
-                             if (rowData.test_result[obj][result] == "failed"){
-                                 return "style='background:Tomato;'";
+                     if (rowdata.status == "DONE"){ // status should be modified to right value.
+                         var result = 1;
+
+                         for (obj in rowdata.test_result){
+                             if (rowdata.test_result[obj][result] == "FAIL"){
+                                 return "style='background:#F6CCD0;'";
                              }
                          }
-                         return "style='background:Chartreuse;'";
+                         return "style='background:#E3FAD6;'";
                      }
                  },
              });
@@ -290,8 +304,12 @@
      });
      function do_snapshot()
      {
-         if (confirm("Save this snapshot, are your sure ?")) {
-             $.get('/snapshot_store/', {'platform_list' : platform});
+         if (! platform){
+             alert("This page is NOT associated with ANY <platform>.\n This snapshot is <invalid> and can NOT be stored.");
+         }else{
+             if (confirm("Save this snapshot, are your sure ?")) {
+                 $.get('/snapshot_store/', {'platform_list' : platform});
+             }
          }
      }
 

@@ -231,14 +231,13 @@ def splitter(action, provider = None, extractor = None):
         for cookie in provider.formatted_rawdata:
             PLATFORM = cookie.get('PLATFORM',"mustExist") # vaild?
             ERD_ID = cookie.get('ERD_ID', "unused")
+            description = cookie.get('description', "unused")
 
             for tp in cookie:
                 try:
                     mutex.acquire()
                     if tp in types and cookie[tp]:
-                        # mutex.acquire()
-                        types[tp](PLATFORM, ERD_ID, cookies = cookie[tp]).doit(action)
-                        # mutex.release()
+                        types[tp](PLATFORM, ERD_ID, cookies = cookie[tp], description = description).doit(action)
                 except Exception as e:
                     vlog("> &_& Save action of [{tp}] occurs exception, reason: [{reason}]".format(tp=tp, reason=e.args))
                     #raise
@@ -382,7 +381,7 @@ class ExcelDataProcesser(CookiesProcesser):
                      'project',
                      'component')
 
-    def __init__(self, PLATFORM, ERD_ID, cookies = None, ERD_model = Erds, FW_VERSION = "unused"):
+    def __init__(self, PLATFORM, ERD_ID, cookies = None, ERD_model = Erds, FW_VERSION = "unused", **kwargs):
         self.platform = PLATFORM
         self.ERD_ID = ERD_ID
         self.cookies = cookies
@@ -465,18 +464,10 @@ class JiraDataProcesser(CookiesProcesser):
                      'bug_jiras',
                      'workload',
                      'milestone',
-
                      'F_casetree',)
-                     # [
-                     #     {
-                     #         'case_name' : "",
-                     #         'case_age' : "",
-                     #         'F_report_path': "",
-                     #     },
-                     # ...
-                     # ]
 
-    def __init__(self, PLATFORM, ERD_ID, cookies = None, ERD_model = Erds, FW_VERSION = "unused"):
+
+    def __init__(self, PLATFORM, ERD_ID, cookies = None, ERD_model = Erds, FW_VERSION = "unused", **kwargs):
         self.platform = PLATFORM
         self.ERD_ID = ERD_ID
         self.cookies = cookies
@@ -588,12 +579,12 @@ class JiraDataProcesser(CookiesProcesser):
             for d in JiraDataProcesser.data_category:
                 # pick Erds Table items
                 if d in Erds.__dict__:
-                    vlog(">> [pick] Deal Erds Table's type [{}]".format(d))
+                    #vlog(">> [pick] Deal Erds Table's type [{}]".format(d))
                     out[e.version][d] = e.__dict__[d]
 
                 # pick TestCases Table items
                 if d == 'F_casetree':
-                    vlog(">> [pick] Deal TestCases Table's type [{}]".format(d))
+                    #vlog(">> [pick] Deal TestCases Table's type [{}]".format(d))
                     tcl = e.testcases_set.all()
                     out[e.version]['F_casetree'] = {}
                     out[e.version]['IR_report']  = {}
@@ -627,6 +618,7 @@ class JiraDataProcesser(CookiesProcesser):
                                     tc.case_name : {
                                         'case_name' : tc.case_name,
                                         'fw_version' : combin_tr.fw_version,
+                                        'test_date' : combin_tr.test_date,
                                         'test_result' : combin_tr.test_result,
                                         'IR_report_path' : combin_tr.IR_report_path,
                                     }})
@@ -667,12 +659,13 @@ class JenkinsDataProcesser(CookiesProcesser):
                     # 'casename2' : {},
                     # ... }
 
-    def __init__(self, PLATFORM, ERD_ID = "unused", cookies = None, ERD_model = Erds, FW_VERSION = ""):
+    def __init__(self, PLATFORM, ERD_ID = "unused", cookies = None, ERD_model = Erds, FW_VERSION = "", **kwargs):
         self.platform = PLATFORM
         self.ERD_ID = ERD_ID
-        self.cookies = cookies
         self.ERD_model = ERD_model
         self.FW_VERSION = FW_VERSION
+        self.description = kwargs.get("description", "UNKNOWN_DESCRIPTION")
+        self.cookies = copy.deepcopy(cookies)
 
         # >>>     "jenkins" : {
         # >>>           'IR_casetree' : {
@@ -740,6 +733,7 @@ class JenkinsDataProcesser(CookiesProcesser):
             tcl = obj.testcases_set.all()
             for tc in tcl:
                 if tc.case_name in self.cookies['IR_casetree']:
+                    self.cookies['IR_casetree'][tc.case_name].update({'description' : self.description})
                     tc.testreports_set.create(**self.cookies['IR_casetree'][tc.case_name]).save()
                     time.sleep(0.1)
                     ANY_MATCHED = True
@@ -808,17 +802,7 @@ class JenkinsDataProcesser(CookiesProcesser):
                         # 'description' : "",
                     }
 
-                    # out[tc.case_name] = {
-                    #     'erd_id' : e.erd_id,
-                    #     'fw_version' : trf[0].fw_version,
-                    #     'test_result' : trf[0].test_result,
-                    #     'test_log' : trf[0].test_log,
-                    #     'test_date' : trf[0].test_date,
-                    #     'IR_report_path' : trf[0].IR_report_path,
-                    # }
-
         return out
-
 
     def pick_with_filter(self):
         pass
@@ -838,7 +822,7 @@ class UiFormDataProcesser(CookiesProcesser):
 
     data_category = ('UiTest',)
 
-    def __init__(self, PLATFORM, ERD_ID, cookies = None, ERD_model = Erds, FW_VERSION = "unused"):
+    def __init__(self, PLATFORM, ERD_ID, cookies = None, ERD_model = Erds, FW_VERSION = "unused" , **kwargs):
         self.ERD_ID = ERD_ID
         self.cookies = cookies
         self.ERD_model = ERD_model
@@ -934,7 +918,7 @@ class Query:
     def test_report_data(self):
         ui_out = []
 
-        platform = self.valid_args['platform'].strip()
+        platform = self.valid_args['platform'].strip().upper()
         Q_filter_platform = Q(platform=platform)
         if self.which_query == "ERD_caselist_query":
             ERD_ID = self.valid_args['ERD_ID'].strip()
@@ -946,7 +930,8 @@ class Query:
         for e in el:
             if self.which_query == "casename_query":
                 casename = self.valid_args['casename'].strip()
-                tcl = e.testcases_set.all().filter(case_name=casename)
+                q_casename_filter = Q(case_name__icontains=casename)
+                tcl = e.testcases_set.all().filter(q_casename_filter)
             else:
                 tcl = e.testcases_set.all()
             for tc in tcl:
@@ -1043,8 +1028,8 @@ class SnapshotDealer(QueryMixin):
     def pickling(self, platform, any_obj, tag = "AutoSaveWeekly"):
         s = ProjectSnapshot()
         if not platform:
-            s.platform = "UNKNOW_PLATFORM"
-            vlog("unknow platform, maybe you should make sure that [cookies] of <ERD_page.htm> NOT empty.")
+            s.platform = "UNKNOWN_PLATFORM"
+            vlog("unknown platform, maybe you should make sure that [cookies] of <ERD_page.htm> NOT empty.")
         else:
             s.platform = platform
         s.tag  = tag

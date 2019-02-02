@@ -2242,7 +2242,8 @@ def show_time_second_from_jira(platform):
             'milestone' :"alpha-01",
             'F_casetree' : [
                 {
-                    'case_name' : "test_case_01_alpha_01",
+                    #'case_name' : "test_case_01_alpha_01",
+                    'case_name' : "ACIS_A_D_LSBUS_I2C_TEST",
                     'case_age' : "2018-11-25",
                     'F_report_path' : random.choice(report_path),
                 },

@@ -121,7 +121,7 @@ class AutoJenkinsProvider(vcore.Provider):
     def get_element(self, files):
         """
         Element:
-        - TESTCASE - Result - Test_Date - Test_Times - Test_Log - Test_IR_Report
+        - TESTCASE - Result - Description - Test_Date - Test_Times - Test_Log - Test_IR_Report
         - Platform - FW_version - PASS_TIMES - FAIL_TIMES
         """
         record = {}
@@ -130,11 +130,12 @@ class AutoJenkinsProvider(vcore.Provider):
             'testcase'       : 1,
             'result'         : 2,
             'test_date'      : 3,
-            'test_times'     : 4,
-            'test_log'       : 5,
-            'test_ir_report' : 6,
+            'description'    : 4,
+            'test_times'     : 5,
+            'test_log'       : 6,
+            'test_ir_report' : 7,
 
-            'product'        : 1, # same as project
+            'product'        : 1, # translate to platform
             'fw_version'     : 2,
         }
 
@@ -143,7 +144,7 @@ class AutoJenkinsProvider(vcore.Provider):
             '9X40' : ('AR7598',),
         }
 
-        re_SWI_ACIS = re.compile(r'TESTCASE:\[(.*?)\]\s*Result:\[(.*?)\]\s*Test_Date:\[(.*?)\]\s*Test_Times:\[(.*?)\]\s*Test_Log:\[(.*?)\]\s*Test_IR_Report:\[(.*?)\]\s*')
+        re_SWI_ACIS = re.compile(r'TESTCASE:\[(.*?)\]\s*Result:\[(.*?)\]\s*Test_Date:\[(.*?)\]\s*Description:\[(.*?)\]\s*Test_Times:\[(.*?)\]\s*Test_Log:\[(.*?)\]\s*Test_IR_Report:\[(.*?)\]\s*')
         re_AT_ATI   = re.compile(r'\[Model: (.*)<CR><LF>Revision: (.*?)\s')
 
         for f in files:
@@ -167,6 +168,7 @@ class AutoJenkinsProvider(vcore.Provider):
                     if gs and not last_one_touch:
                         record[f]['TESTCASE'] = gs.group(re_g['testcase'])
                         record[f]['Result']   = gs.group(re_g['result'])
+                        record[f]['Description']= gs.group(re_g['description'])
                         record[f]['Test_Date']  = gs.group(re_g['test_date'])
                         record[f]['Test_Times'] = gs.group(re_g['test_times'])
                         record[f]['Test_Log']   = gs.group(re_g['test_log'])
@@ -195,6 +197,7 @@ class AutoJenkinsProvider(vcore.Provider):
 
         any=0
         once_dict['PLATFORM'] = record[files[any]]['Platform']
+        once_dict['description'] = record[files[any]]['Description']
 
         ref = once_dict['jenkins']['IR_casetree']
         for f in files:
@@ -285,47 +288,118 @@ class DefaultExtractor(vcore.Extractor):
     def is_vaild_ver(self, spec_ver):
         return True if type(spec_ver) == str and re.match('\d{2}.\d{2}', spec_ver) else False
 
-    def ext_snapshot(self, platform , spec_ver = "max"):
+    def format_erd_data_from_excel(self, versions, default_extractor_data):
+        output_dict = {}
+        if type(versions) != list or len(versions) <= 0:
+            raise Exception("Expected provide a version list and length > 1, actual is %s, length is %d" %
+                            (type(versions), len(versions)))
+        lastest_ver = max(versions)
+        versions_list_string = ''
+        for sv in versions:
+            if default_extractor_data['excel'][sv]['description'] == 'blank':
+                versions_list_string = versions_list_string + sv + '-deactive,'
+            else:
+                versions_list_string = versions_list_string + sv + '-active,'
+        output_dict['version'] = versions_list_string
 
+        deep_excel = default_extractor_data['excel'][lastest_ver]
+        output_dict['erd_id'] = deep_excel['erd_id']
+        output_dict['platform'] = deep_excel['platform']
+        output_dict['author'] = deep_excel['author']
+        output_dict['category'] = deep_excel['category']
+        output_dict['component'] = deep_excel['component']
+        output_dict['product_priority'] = deep_excel['product_priority']
+        output_dict['title'] = deep_excel['title']
+        output_dict['description'] = deep_excel['description']
+        return output_dict
+
+    def format_data_from_jira(self, erd_description, deep_jira, minor_deep_jira):
+        output_dict = {}
+        output_dict['HLD'] = deep_jira['HLD']
+        output_dict['l1_jira'] = deep_jira['l1_jira']
+        output_dict['l2_jira'] = deep_jira['l2_jira']
+        output_dict['status'] = deep_jira['status']
+        output_dict['workload'] = deep_jira['workload']
+        output_dict['milestone'] = deep_jira['milestone']
+        if deep_jira['bug_jiras']:
+            output_dict['bug_jiras'] = deep_jira['bug_jiras'].split(',')
+        else:
+            output_dict['bug_jiras'] = []
+
+        # jira part : TestCases table partition
+        # Hope NOT display 'test_case' and 'F_report_path' on UI for the item that description is 'blank'.
+        if erd_description != 'blank':
+            output_dict['case_name'] = list(deep_jira['F_casetree'].keys())
+            output_dict['F_report_path'] = []
+            for dj in deep_jira['F_casetree']:
+                output_dict['F_report_path'].append(deep_jira['F_casetree'][dj]['F_report_path'])
+
+            output_dict['test_result'] = []
+            output_dict['test_report'] = []
+
+            for casename in output_dict['case_name']:
+                if deep_jira['IR_report'] and deep_jira['IR_report'].get(casename):
+                    output_dict['test_result'].append((casename, deep_jira['IR_report'][casename]['test_result']))
+                    output_dict['test_report'].append((casename,
+                                                   deep_jira['IR_report'][casename]['fw_version'],
+                                                   deep_jira['IR_report'][casename]['test_date'],
+                                                   deep_jira['IR_report'][casename]['IR_report_path']))
+                elif casename in minor_deep_jira['IR_report'].keys():
+                    # minor_deep_jira = others['jira'][minor_ver]
+                    if minor_deep_jira['IR_report'] and minor_deep_jira['IR_report'].get(casename):
+                        output_dict['test_result'].append((casename, minor_deep_jira['IR_report'][casename]['test_result']))
+                        output_dict['test_report'].append((casename,
+                                                       minor_deep_jira['IR_report'][casename]['fw_version'],
+													   minor_deep_jira['IR_report'][casename]['test_date'],
+                                                       minor_deep_jira['IR_report'][casename]['IR_report_path']))
+        else:
+            output_dict['case_name'] = ""
+            output_dict['F_report_path'] = []
+            output_dict['test_result'] = []
+            output_dict['test_report'] = []
+        return output_dict
+
+    def get_latest_version(self, spec_ver, versions):
+        lastest_ver = ""
+        sub_versions = []
+        if spec_ver == "max":
+            lastest_ver = max(versions)
+            sub_versions = versions
+        else:
+            if not self.is_vaild_ver(spec_ver):
+                sub_versions = versions
+                lastest_ver = max(versions)
+            else:
+                if spec_ver in versions:
+                    sub_versions = versions[:versions.index(spec_ver) + 1]
+                    lastest_ver = spec_ver
+                else:
+                    if spec_ver > max(versions):
+                        sub_versions = versions
+                        lastest_ver = max(versions)
+                    elif spec_ver < min(versions):
+                        sub_versions = []
+                        lastest_ver = ""
+                    else:
+                        for v in versions:
+                            if spec_ver < v:
+                                sub_versions = versions[:versions.index(v)]
+                                lastest_ver = versions[versions.index(v) - 1]
+                                break
+        return lastest_ver, sub_versions
+
+    def ext_snapshot(self, platform , spec_ver = "max"):
         out = []
         data = self._get_data().pop(platform)
 
         for d in data:
             tmp_out = {}
-
             others = data[d]
-
             if not others['excel']: continue
 
+            # Get the specified version and sub-versions
             versions = sorted(list(others['excel'].keys()))
-            sub_versions = []
-
-            if spec_ver == "max":
-                lastest_ver = max(versions)
-                sub_versions = versions
-            else:
-                if not self.is_vaild_ver(spec_ver):
-                    sub_versions = versions
-                    lastest_ver = max(versions)
-                else:
-                    if spec_ver in versions:
-                        sub_versions = versions[:versions.index(spec_ver) + 1]
-                        lastest_ver = spec_ver
-                    else:
-                        if spec_ver > max(versions):
-                            sub_versions = versions
-                            lastest_ver = max(versions)
-                        elif spec_ver < min(versions):
-                            sub_versions = []
-                            lastest_ver = ""
-                        else:
-                            for v in versions:
-                                if spec_ver < v:
-                                    sub_versions = versions[:versions.index(v)]
-                                    lastest_ver = versions[versions.index(v)-1]
-                                    break
-
-            # print("UI lastest version : <{}> for ERD : [{}]".format(lastest_ver, ERD_ID))
+            (lastest_ver, sub_versions) = self.get_latest_version(spec_ver, versions)
 
             # 'minor_ver' is useful when Erds Table update, but no Jenkins Test-Report upload.
             from heapq import nlargest
@@ -338,72 +412,13 @@ class DefaultExtractor(vcore.Extractor):
             if lastest_ver == "":
                 continue
 
-            tmp_out['version'] = {}
-
-            versions_list_string = ''
-            for sv in sub_versions:
-                if others['excel'][sv]['description'] == 'blank':
-                    versions_list_string = versions_list_string + sv + '-deactive,'
-                else:
-                    versions_list_string = versions_list_string + sv + '-active,'
-            tmp_out['version'] = versions_list_string
-            # print("output version dict: {}".format(tmp_out['version']))
-
-            deep_excel = others['excel'][lastest_ver]
-
+            # excel part : ERD table partition
+            tmp_out.update(self.format_erd_data_from_excel(sub_versions, others))
+            erd_description = tmp_out['description']
+            # jira part : ERD table partition
             deep_jira  = others['jira'][lastest_ver]
             minor_deep_jira = others['jira'][minor_ver]
-
-            # excel part : ERD table partition
-            tmp_out['erd_id'] = deep_excel['erd_id']
-            tmp_out['platform'] = deep_excel['platform']
-            tmp_out['author'] = deep_excel['author']
-            tmp_out['category'] = deep_excel['category']
-            tmp_out['product_priority'] = deep_excel['product_priority']
-            tmp_out['title'] = deep_excel['title']
-            tmp_out['description'] = deep_excel['description']
-
-            # jira part : ERD table partition
-            tmp_out['HLD'] = deep_jira['HLD']
-            tmp_out['l1_jira'] = deep_jira['l1_jira']
-            tmp_out['l2_jira'] = deep_jira['l2_jira']
-            tmp_out['status'] = deep_jira['status']
-            tmp_out['workload'] = deep_jira['workload']
-            tmp_out['milestone'] = deep_jira['milestone']
-            if deep_jira['bug_jiras']:
-                tmp_out['bug_jiras'] = deep_jira['bug_jiras'].split(',')
-            else:
-                tmp_out['bug_jiras'] = []
-
-            # jira part : TestCases table partition
-            # Hope NOT display 'test_case' and 'F_report_path' on UI for the item that description is 'blank'.
-            if deep_excel['description'] != 'blank':
-                tmp_out['case_name'] = list(deep_jira['F_casetree'].keys())
-                tmp_out['F_report_path'] = []
-                for dj in deep_jira['F_casetree']:
-                    tmp_out['F_report_path'].append(deep_jira['F_casetree'][dj]['F_report_path'])
-
-                tmp_out['test_result'] = []
-                tmp_out['test_report'] = []
-
-                for casename in tmp_out['case_name']:
-                    if deep_jira['IR_report']:
-                        tmp_out['test_result'].append((casename, deep_jira['IR_report'][casename]['test_result']))
-                        tmp_out['test_report'].append((casename,
-                                                       deep_jira['IR_report'][casename]['fw_version'],
-                                                       deep_jira['IR_report'][casename]['IR_report_path']))
-                    elif casename in minor_deep_jira['IR_report'].keys():
-                        # minor_deep_jira = others['jira'][minor_ver]
-                        if minor_deep_jira['IR_report']:
-                            tmp_out['test_result'].append((casename, minor_deep_jira['IR_report'][casename]['test_result']))
-                            tmp_out['test_report'].append((casename,
-                                                           minor_deep_jira['IR_report'][casename]['fw_version'],
-                                                           minor_deep_jira['IR_report'][casename]['IR_report_path']))
-            else:
-                tmp_out['case_name'] = ""
-                tmp_out['F_report_path'] = []
-                tmp_out['test_result'] = []
-                tmp_out['test_report'] = []
+            tmp_out.update(self.format_data_from_jira(erd_description, deep_jira, minor_deep_jira))
 
             out.append(tmp_out)
         return out

@@ -4,12 +4,16 @@
 
 <ul>
     {% for snap in latest_list %}
-    <li> <a href="/snapshot_index/?date={{ snap.date }}&tag={{ snap.tag }}"> {{ snap }} </a></li>
+    <li> <a href="/snapshot_index/?platform={{ snap.platform }}&date={{ snap.date }}&tag={{ snap.tag }}">
+        <span style="color:red;font-weight:bold">{{ snap.platform }}</span>_
+        <span style="color:blue;font-weight:bold">{{ snap.date }}</span>_
+        <span style="color:green;font-weight:bold">{{ snap.tag }}</span>
+    </a></li>
     {% endfor %}
 </ul>
 
 {% else %}
-<p> No Snapshot Show </p>
+<p> No Project Snapshot Show </p>
 {% endif %}
 
 <br />
@@ -21,7 +25,7 @@
 <form action="/snapshot_query" target="_self">
     <label> Platform: </label>
     <br />
-    <input type="text" name='fw_version' />
+    <input type="text" name='platform' />
     <br />
     <label> Shot Date:  </label>
     <br />

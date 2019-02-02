@@ -28,7 +28,7 @@ DEBUG = True
 
 hostname = socket.gethostname()
 hostaddr = socket.gethostbyname(hostname)
-ALLOWED_HOSTS = [hostname,hostaddr,'127.0.0.1','10.22.51.143']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition

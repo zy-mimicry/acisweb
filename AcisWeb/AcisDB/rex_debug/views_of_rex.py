@@ -586,87 +586,87 @@ def rex_actions_dispatcher(request):
 
 
 def show_time_do_excel_save():
-    vcore.splitter('save', provider = RexExcelProvider(platform = 'SD55', test_version = 'first'))
+    vcore.splitter('save', provider = RexExcelProvider(platform = '9X40', test_version = 'first'))
 
 def show_time_do_jira_save_first():
-    vcore.splitter('save', provider = RexJiraProvider(platform = 'SD55', test_version = 'first'))
+    vcore.splitter('save', provider = RexJiraProvider(platform = '9X40', test_version = 'first'))
 
 def show_time_do_jira_save_second():
-    vcore.splitter('save', provider = RexJiraProvider(platform = 'SD55', test_version = 'second'))
+    vcore.splitter('save', provider = RexJiraProvider(platform = '9X40', test_version = 'second'))
 
 def show_time_do_jira_save_third():
-    vcore.splitter('save', provider = RexJiraProvider(platform = 'SD55', test_version = 'third'))
+    vcore.splitter('save', provider = RexJiraProvider(platform = '9X40', test_version = 'third'))
 
 
 def show_time_do_excel_second_update():
-    vcore.splitter('save', provider = RexExcelProvider(platform = 'SD55', test_version = 'second'))
+    vcore.splitter('save', provider = RexExcelProvider(platform = '9X40', test_version = 'second'))
     # vcore.splitter('save', provider = RexJiraProvider(platform = 'SD55', test_version = 'follow'))
 
 def show_time_do_excel_third_update():
-    vcore.splitter('save', provider = RexExcelProvider(platform = 'SD55', test_version = 'third'))
+    vcore.splitter('save', provider = RexExcelProvider(platform = '9X40', test_version = 'third'))
     # vcore.splitter('save', provider = RexJiraProvider(platform = 'SD55', test_version = 'follow'))
 
 def show_time_do_excel_fourth_update():
-    vcore.splitter('save', provider = RexExcelProvider(platform = 'SD55', test_version = 'fourth'))
+    vcore.splitter('save', provider = RexExcelProvider(platform = '9X40', test_version = 'fourth'))
     # vcore.splitter('save', provider = RexJiraProvider(platform = 'SD55', test_version = 'follow'))
 
 def show_time_do_follow_excel():
-    vcore.splitter('save', provider = RexJiraProvider(platform = 'SD55', test_version = 'follow'))
+    vcore.splitter('save', provider = RexJiraProvider(platform = '9X40', test_version = 'follow'))
 
 
 def do_step_01():
-    vcore.splitter('save', provider = RexExcelProvider(platform = 'SD55', test_version = 'first'))
+    vcore.splitter('save', provider = RexExcelProvider(platform = '9X40', test_version = 'first'))
 
 def do_step_02():
-    vcore.splitter('save', provider = RexJiraProvider(platform = 'SD55', test_version = 'first'))
+    vcore.splitter('save', provider = RexJiraProvider(platform = '9X40', test_version = 'first'))
 
 def do_step_03():
-    vcore.splitter('save', provider = RexJiraProvider(platform = 'SD55', test_version = 'second'))
+    vcore.splitter('save', provider = RexJiraProvider(platform = '9X40', test_version = 'second'))
 
 def do_step_04():
-    vcore.splitter('save', provider = JenkinsProvider(platform = 'SD55', test_version = 'test01'))
+    vcore.splitter('save', provider = JenkinsProvider(platform = '9X40', test_version = 'test01'))
 
 def do_step_05():
-    vcore.splitter('save', provider = RexExcelProvider(platform = 'SD55', test_version = 'second'))
+    vcore.splitter('save', provider = RexExcelProvider(platform = '9X40', test_version = 'second'))
 
 def do_step_06():
-    vcore.splitter('save', provider = RexJiraProvider(platform = 'SD55', test_version = 'follow01'))
+    vcore.splitter('save', provider = RexJiraProvider(platform = '9X40', test_version = 'follow01'))
 
 def do_step_07():
-    vcore.splitter('save', provider = JenkinsProvider(platform = 'SD55', test_version = 'test02'))
+    vcore.splitter('save', provider = JenkinsProvider(platform = '9X40', test_version = 'test02'))
 
 def do_step_08():
-    vcore.splitter('save', provider = RexJiraProvider(platform = 'SD55', test_version = 'third'))
+    vcore.splitter('save', provider = RexJiraProvider(platform = '9X40', test_version = 'third'))
 
 def do_step_09():
-    vcore.splitter('save', provider = JenkinsProvider(platform = 'SD55', test_version = 'test03'))
+    vcore.splitter('save', provider = JenkinsProvider(platform = '9X40', test_version = 'test03'))
 
 def do_step_10():
-    vcore.splitter('save', provider = RexExcelProvider(platform = 'SD55', test_version = 'third'))
+    vcore.splitter('save', provider = RexExcelProvider(platform = '9X40', test_version = 'third'))
 
 def do_step_11():
-    vcore.splitter('save', provider = RexJiraProvider(platform = 'SD55', test_version = 'follow02'))
+    vcore.splitter('save', provider = RexJiraProvider(platform = '9X40', test_version = 'follow02'))
 
 def do_step_12():
-    vcore.splitter('save', provider = JenkinsProvider(platform = 'SD55', test_version = 'test04'))
+    vcore.splitter('save', provider = JenkinsProvider(platform = '9X40', test_version = 'test04'))
 
 def do_step_13():
-    vcore.splitter('save', provider = RexJiraProvider(platform = 'SD55', test_version = 'fourth'))
+    vcore.splitter('save', provider = RexJiraProvider(platform = '9X40', test_version = 'fourth'))
 
 def do_step_14():
-    vcore.splitter('save', provider = JenkinsProvider(platform = 'SD55', test_version = 'test05'))
+    vcore.splitter('save', provider = JenkinsProvider(platform = '9X40', test_version = 'test05'))
 
 def do_step_15():
-    vcore.splitter('save', provider = RexExcelProvider(platform = 'SD55', test_version = 'fourth'))
+    vcore.splitter('save', provider = RexExcelProvider(platform = '9X40', test_version = 'fourth'))
 
 def do_step_16():
-    vcore.splitter('save', provider = RexJiraProvider(platform = 'SD55', test_version = 'follow03'))
+    vcore.splitter('save', provider = RexJiraProvider(platform = '9X40', test_version = 'follow03'))
 
 def do_step_17():
-    vcore.splitter('save', provider = JenkinsProvider(platform = 'SD55', test_version = 'test06'))
+    vcore.splitter('save', provider = JenkinsProvider(platform = '9X40', test_version = 'test06'))
 
 def do_step_18():
-    vcore.splitter('save', provider = JenkinsProvider(platform = 'SD55', test_version = 'test07'))
+    vcore.splitter('save', provider = JenkinsProvider(platform = '9X40', test_version = 'test07'))
 
 show_supported_cmds = {
     'do_step_01' : do_step_01,

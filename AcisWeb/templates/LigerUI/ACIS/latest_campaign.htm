@@ -4,11 +4,16 @@
 
 <ul>
     {% for cam in latest_list %}
-    <li> <a href="/campaign_index/?platform={{cam.platform}}&fw_version={{cam.fw_version}}&test_date={{cam.test_date}}&description={{cam.description}}"> {{ cam }} </a> </li>
+    <li> <a href="/campaign_index/?platform={{cam.platform}}&fw_version={{cam.fw_version}}&test_date={{cam.test_date}}&description={{cam.description}}">
+        <span style="color:red;font-weight:bold">{{ cam.fw_version }}</span>_
+        <span style="color:blue;font-weight:bold">{{ cam.description }}</span>_
+        <span style="color:green;font-weight:bold">{{ cam.test_date }}</span>
+    </a>
+    </li>
     {% endfor %}
 </ul>
 {% else %}
-<p> No Campaign Show </p>
+<p> No Test Campaign Show </p>
 {% endif %}
 
 <br />
@@ -22,13 +27,13 @@
     <br />
     <input type="text" name='fw_version' />
     <br />
-    <label> Test Date:  </label>
-    <br />
-    <input type="text" name='test_date' />
-    <br />
     <label> Description:  </label>
     <br />
     <input type="text" name='description' />
+    <br />
+    <label> Test Date:  </label>
+    <br />
+    <input type="text" name='test_date' />
     <br />
 
     <input type="submit" value="submit" />
