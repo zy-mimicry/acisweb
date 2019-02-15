@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Proudly presented by PycCharts</title>
+	      {% for jsfile_name in script_list %}
+        <script src="{{ host }}/{{ jsfile_name }}.js"></script>
+        {% endfor %}
+    </head>
+
+    <body>
+        <table>
+            {% for platform, bar_list in bar_dict_rendered.items %}
+            <tr>
+                {% for bar in bar_list %}
+                <td>
+                    <p>PLATFORM: {{ platform }}</p>
+                    {{ bar|safe }}
+                </td>
+                {% endfor %}
+            </tr>
+            <br />
+            {% endfor %}
+        </table>
+
+    </body>
+</html>

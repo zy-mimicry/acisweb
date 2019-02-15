@@ -277,6 +277,7 @@ class IntegrationExtractor(vcore.Extractor):
             out['test_date'] = vs['test_date']
             out['test_result'] = vs['test_result']
             out['IR_report_path'] = vs['IR_report_path']
+            out['note'] = vs['note']
             UI_out.append(out)
             out = {}
 

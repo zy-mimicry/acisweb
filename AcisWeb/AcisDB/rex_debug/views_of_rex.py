@@ -708,11 +708,11 @@ def rex_prompt(request):
     return HttpResponse("Command : {} done".format(global_cmd))
 
 def rex_test_query(request):
-    from ..vcore import Query
-    #q = Query('integration_query_exactly', platform= 'SD55', fw_version="SWI9X28A_00.11.01.06", test_date="2019-02-03")
-    # q = Query('integration_query_exactly', platform= 'SD55', fw_version="SWI9X28A_00.11.01.06", test_date="2019-01-03")
-    # q = Query('night_regression_query', platform= 'SD55', test_date="2019-01-03")
-    # q = Query('ERD_caselist_query', platform= 'SD55', ERD_ID="04.60.26")
-    q = Query('casename_query', platform= 'SD55', casename = "test_case_03_alpha_02")
+    from ..vcore import TestReportQuery
+    #q = TestReportQuery('integration_query_exactly', platform= 'SD55', fw_version="SWI9X28A_00.11.01.06", test_date="2019-02-03")
+    # q = TestReportQuery('integration_query_exactly', platform= 'SD55', fw_version="SWI9X28A_00.11.01.06", test_date="2019-01-03")
+    # q = TestReportQuery('night_regression_query', platform= 'SD55', test_date="2019-01-03")
+    # q = TestReportQuery('ERD_caselist_query', platform= 'SD55', ERD_ID="04.60.26")
+    q = TestReportQuery('casename_query', platform= 'SD55', casename = "test_case_03_alpha_02")
     q.do_query()
     return HttpResponse("done")

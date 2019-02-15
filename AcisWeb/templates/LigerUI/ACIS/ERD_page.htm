@@ -229,17 +229,17 @@
                  alternatingRow: false,
                  pageSize:200,
                  pageSizeOptions: [200, 300, 400,500],
-                 enabledSort : true,
                  sortName:'ERD_ID',
                  sortOrder:'desc',
-                 clickToEdit : false,
                  dataType: 'server',
                  dataAction: 'server',
                  usePager: true,
                  async: true,
                  scroll: true,
+                 enabledSort: true,
+                 clickToEdit: false,
                  enabledEdit: true,
-                 onAfterShowData :function (rowdata,rowid) {
+                 onAfterShowData: function (rowdata,rowid) {
                      $('[class="l-grid-row-cell-inner"]').each(function () {$(this).css('min-height',"20px");});
                      $('[class="l-grid-header-table"]').each(function () {$(this).css('background-color',"#CCEBFD");$(this).css('font-weight',"bold");});
                  },

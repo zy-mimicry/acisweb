@@ -842,20 +842,26 @@ class UiFormDataProcesser(CookiesProcesser):
             return self.pick()
 
 
-class UnsupportedQuery(Exception):
-    pass
-class QueryArgsInvalid(Exception):
-    pass
+class UnsupportedQuery(Exception): pass
+class QueryArgsInvalid(Exception): pass
+class QueryNoteMultiple(Exception): pass
 
 class Query:
+
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+
+class TestReportQuery(Query):
     supported_query = (
         'test_report_query',
         'ERD_caselist_query',
         'casename_query',
+        'pick_note',
     )
 
     def __init__(self, which_query, **kwargs):
-        if which_query not in Query.supported_query:
+        if which_query not in TestReportQuery.supported_query:
             raise UnsupportedQuery("Query NOT be supported.")
 
         if which_query == 'test_report_query':
@@ -875,6 +881,45 @@ class Query:
                 raise QueryArgsInvalid("[{}] can't get valid args.[{}]".format(which_query, kwargs))
             self.valid_args = kwargs
             self.which_query = which_query
+
+        elif which_query == 'pick_note':
+            if {'platform', 'fw_version', 'test_date', 'ERD_ID', 'case_name'} - kwargs.keys():
+                raise QueryArgsInvalid("[{}] can't get valid args.[{}]".format(which_query, kwargs))
+            self.valid_args = kwargs
+            self.which_query = which_query
+
+        self.test_report_objs = []
+
+
+    def pick_note_obj(self):
+
+        # filter for Erds Model.
+        Q_erd_model_filter = Q(platform = self.valid_args['platform'].upper()) \
+                             & Q(erd_id = self.valid_args['ERD_ID'])
+        # filter for TestCases Model.
+        Q_testcase_model_filter = Q(case_name = self.valid_args['case_name'])
+
+        # fiter for TestReports Model.
+        Q_testreports_model_filter = Q(fw_version = self.valid_args['fw_version']) \
+                                     & Q(test_date = self.valid_args['test_date'])
+
+        only = 0 # Only one object should be picked out.
+        pick_out = []
+        el = Erds.objects.filter(Q_erd_model_filter)
+        for e in el:
+            tcl = e.testcases_set.filter(Q_testcase_model_filter)
+            if tcl:
+                for tc in tcl:
+                    trl = tc.testreports_set.filter(Q_testreports_model_filter)
+                    if trl:
+                        for tr in trl:
+                            pick_out.append(tr)
+
+        if len(pick_out) != 1:
+            raise QueryNoteMultiple("Hope get only one object, but query out [{}],\n [{}]"
+                                    "".format(len(pick_out), pick_out))
+        return pick_out[only]
+
 
     def test_report_filter(self, query_set):
         fw_version = self.valid_args['fw_version'].strip()
@@ -913,6 +958,7 @@ class Query:
         out['test_date'] = test_report.test_date
         out['test_result'] = test_report.test_result
         out['IR_report_path'] = test_report.IR_report_path
+        out['note'] = test_report.note
         return out
 
     def test_report_data(self):
@@ -940,7 +986,12 @@ class Query:
                 else:
                     trl = tc.testreports_set.all()
 
+
                 for tr in trl:
+
+                    # Hope pick out all test report objects.
+                    self.test_report_objs.append(tr)
+
                     ui_out.append(self.format_test_report(platform, e.erd_id, tc.case_name, tr))
 
         return ui_out

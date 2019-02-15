@@ -13,22 +13,20 @@
     <script src="../../LigerUI/lib/jquery-validation/jquery.validate.min.js"></script>
     <script src="../../LigerUI/lib/jquery-validation/jquery.metadata.js"></script>
     <script src="../../LigerUI/lib/jquery-validation/messages_cn.js"></script>
+    <script src="../../LigerUI/lib/json2.js" type="text/javascript"></script>
     <script src="../../LigerUI/lib/ligerUI/js/core/base.js" type="text/javascript"></script>
     <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerToolBar.js" type="text/javascript"></script>
     <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerDialog.js" type="text/javascript"></script>
-    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerGrid.js" type="text/javascript"></script>
     <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerFilter.js" type="text/javascript"></script>
-    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerDrag.js" type="text/javascript"></script>
-    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerResizable.js" type="text/javascript"></script>
-    <script src="../../LigerUI/lib/ligerUI/js/core/base.js" type="text/javascript"></script>
-    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerPanel.js" type="text/javascript"></script>
-    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerPortal.js" type="text/javascript"></script>
     <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerListBox.js" type="text/javascript"></script>
     <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerCheckBox.js" type="text/javascript"></script>
     <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerComboBox.js" type="text/javascript"></script>
-    <script src="../../LigerUI/lib/ligerUI/js/ligerui.all.js"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerGrid.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerTextBox.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerDateEditor.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerSpinner.js" type="text/javascript"></script>
     <script src="../../LigerUI/demos/filter/ligerGrid.showFilter.js" type="text/javascript"></script>
-    <script src="../../LigerUI/demos/grid/CustomersData.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/ligerui.all.js"></script>
 
     <script type="text/javascript">
      $.ligerDefaults.Filter.operators['string'] =
@@ -41,20 +39,18 @@
      $(function ()
      {
          jira_head = 'https://issues.sierrawireless.com/browse/';
-         window['g'] =
+         window['g'] = manager =
              $("#maingrid4").ligerGrid({
                  columns: [
-                     { display: 'ERD_ID', name: 'erd_id', align: 'center', minWidth: 60 },
+                     { display: 'ERD_ID', name: 'erd_id', align: 'center', minWidth: 30 },
                      { display: 'CaseName', name: 'case_name', minWidth: 200, align: 'center'},
-                     { display: 'Platform', name: 'platform', minWidth: 150, align: 'center' },
-                     { display: 'FW_version', name: 'fw_version', minWidth: 100, align: 'center' },
-                     /* { display: 'TestLog', name: 'test_log', minWidth: 120, align: 'center' }, */
-                     { display: 'TestResult', name: 'test_result', minWidth: 70, align: 'center' },
-                     { display: 'TestDate', name: 'test_date', minWidth: 70, align: 'center' },
+                     { display: 'Platform', name: 'platform', minWidth: 50, align: 'center' },
+                     { display: 'FW_version', name: 'fw_version', minWidth: 80, align: 'center' },
+                     { display: 'TestResult', name: 'test_result', minWidth: 40, align: 'center' },
+                     { display: 'TestDate', name: 'test_date', minWidth: 65, align: 'center' },
                      { display: 'IR_Report_Path', name: 'IR_report_path', minWidth: 70, align: 'center' },
+                     { display: 'NOTE', name: 'note', minWidth: 200, align: 'center', editor: { type: 'text' } },
                  ],
-                 //data: $.extend(true,{},CustomersData),
-                 //data: $.extend(true,{}, myvar),
                  data: $.extend(true,{}, liger_cookies),
                  toolbar: { items: [
                      {
@@ -68,297 +64,324 @@
                          icon: 'view'
                      }
                  ]},
-                fixedCellHeight: true,
-                pageSize: 100,
-                checkbox: true,
-                width: '100%',
-                height: '100%',
-                alternatingRow: false,
-                pageSize:1000,
-                pageSizeOptions: [100, 200, 300,400],
-                enabledSort : true,
-                sortName:'ERD_ID',
-                sortOrder:'desc',
-                clickToEdit : false,
-                dataType: 'server',
-                dataAction: 'server',
-                usePager: true,
-                async: true,
-                scroll: true,
-                enabledEdit: true,
-                onAfterShowData :function (rowdata,rowid) {
-                   $('[class="l-grid-row-cell-inner"]').each(function () {$(this).css('min-height',"20px");});
-                   $('[class="l-grid-header-table"]').each(function () {$(this).css('background-color',"#CCEBFD");$(this).css('font-weight',"bold");});
-                },
-                rowAttrRender: function (rowdata){
-                    if (rowdata.test_result == "PASS"){
-                        return "style='background:green;'";
-                    } else if (rowdata.test_result == "FAIL"){
-                        return "style='background:red;'";
-                    }
-                },
+                 fixedCellHeight: true,
+                 isScroll: true,
+                 enabledEdit: true,
+                 clickToEdit: false,
+                 width: '100%',
+                 height: '100%',
+                 alternatingRow: false,
+                 pageSize: 100,
+                 pageSizeOptions: [100, 200, 300,400],
+                 enabledSort: true,
+                 sortName:'ERD_ID',
+                 sortOrder:'desc',
+                 dataType: 'server',
+                 dataAction: 'server',
+                 usePager: true,
+                 async: true,
+                 scroll: true,
+                 onAfterShowData: function (rowdata,rowid) {
+                     $('[class="l-grid-row-cell-inner"]').each(function () {$(this).css('min-height',"20px");});
+                     $('[class="l-grid-header-table"]').each(function () {$(this).css('background-color',"#CCEBFD");$(this).css('font-weight',"bold");});
+                 },
+                 rowAttrRender: function (rowdata){
+                     if (rowdata.test_result == "PASS"){
+                         return "style='background:#0EC76E;'";
+                     } else if (rowdata.test_result == "FAIL"){
+                         return "style='background:#F94141;'";
+                     }
+                 },
              });
-            $("#pageloading").hide();
+         $("#pageloading").hide();
 
-            columns_data=[];
-            columns_all='';
-            columns_ids='';
-            $(g.columns).each(function (i, column)
-            {
-                if (column.name)
-                {
-                    columns_data.push(
-                    {
-                        text:column.name,
-                        id:column.name
-                    });
-                    columns_all=columns_all+(columns_all?';':'')+column.name;
+         columns_data=[];
+         columns_all='';
+         columns_ids='';
+         $(g.columns).each(function (i, column)
+         {
+             if (column.name)
+             {
+                 columns_data.push(
+                     {
+                         text:column.name,
+                         id:column.name
+                     });
+                 columns_all=columns_all+(columns_all?';':'')+column.name;
 
-                    if (column.hide!=true)
-                    {
-                        columns_ids=columns_ids+(columns_ids?';':'')+column.name;
-                    }
-
+                 if (column.hide!=true)
+                 {
+                     columns_ids=columns_ids+(columns_ids?';':'')+column.name;
                  }
-             });
-            f_open_data={
-                winwidth:540,
-                winheight:420,
-                checkbox:[
-                    {
-                        name:'Column',
-                        text:columns_all,
-                        value:columns_ids,
-                        ctrl:'selcolumn'
-                    },
-                ],
-            };
-            f_open_init(f_open_data);
-        });
 
-        function itemclick()
-        {
-            g.options.data = $.extend(true,{}, liger_cookies);
-            g.showFilter();
-        }
+             }
+         });
+         f_open_data={
+             winwidth:540,
+             winheight:420,
+             checkbox:[
+                 {
+                     name:'Column',
+                     text:columns_all,
+                     value:columns_ids,
+                     ctrl:'selcolumn'
+                 },
+             ],
+         };
+         f_open_init(f_open_data);
+     });
 
-        function f_save_checkin()
-        {
-            var txt = ""
-            var rows = g.getCheckedRows();
-            $(rows).each(function ()
-            {
-                txt += this.id + ",";
-            });
-            return txt
-        };
+     function itemclick()
+     {
+         g.options.data = $.extend(true,{}, liger_cookies);
+         g.showFilter();
+     }
 
-        function f_open_init(dialogData)
-        {
-            check_list = dialogData.checkbox;
+     function f_save_checkin()
+     {
+         var txt = ""
+         var rows = g.getCheckedRows();
+         $(rows).each(function ()
+         {
+             txt += this.id + ",";
+         });
+         return txt
+     };
 
-            htmltext=''
-            for(var id in check_list)
-            {
-                if (check_list[id].ctrl) {
-                    ctrl=check_list[id].ctrl;
-                    if ($('#'+ctrl+'').length>0)
-                    {
-                        $('#'+ctrl+'').val(check_list[id].value);
-                    }
-                    else
-                    {
-                        htmltext=htmltext+'\n<input type="hidden" id="'+ctrl+'" value="'+check_list[id].value+'">'
-                    }
-                }
-            }
-            check_list = dialogData.inputbox;
-            for(var id in check_list)
-            {
-                if (check_list[id].ctrl)
-                {
-                    ctrl=check_list[id].ctrl;
-                    if ($('#'+ctrl+'').length>0)
-                    {
-                        $('#'+ctrl+'').val(check_list[id].value);
-                    }
-                    else
-                    {
-                        htmltext=htmltext+'\n<input type="hidden" id="'+ctrl+'" value="'+check_list[id].value+'">'
-                    }
-                }
-            }
-            if (htmltext)
-                $('#sel_hidden_fields').html(htmltext);
-        }
-        function f_open_option(dialogData)
-        {
-            params={};
-            filter_keys='';
-            check_list = dialogData.checkbox;
-            for(var id in check_list)
-            {
-                if (check_list[id].ctrl && check_list[id].column)
-                {
-                    ctrl=check_list[id].ctrl;
-                    column=check_list[id].column;
-                    method=check_list[id].method;
-                    if ('__iregex'==method)
-                    {
-                        filter_keys=filter_keys+(filter_keys?',':'')+column+method;
-                        params[column]=$('#'+ctrl+'').val().replace(/;/g,'|');
-                    }
-                    else if (method)
-                    {
-                        filter_keys=filter_keys+(filter_keys?',':'')+column+method;
-                        params[column]=$('#'+ctrl+'').val();
-                    }
-                    else
-                    {
-                        params[column]=$('#'+ctrl+'').val();
-                    }
-                }
-            }
-            Fuzzy_Enquiry_cols='';
-            check_list = dialogData.inputbox;
-            for(var id in check_list)
-            {
-                if (check_list[id].ctrl && check_list[id].column)
-                {
-                    ctrl=check_list[id].ctrl;
-                    column=check_list[id].column;
-                    columns=column.split(';');
-                    if (columns.length>1)
-                    {
-                        Fuzzy_Enquiry_cols=Fuzzy_Enquiry_cols+(Fuzzy_Enquiry_cols?' and ':'')+'('+column.replace(/;/g,' or ')+')';
-                    }
-                    method=check_list[id].method;
-                    for(var c in columns)
-                    {
-                        column=columns[c];
-                        if ('__iregex'==method)
-                        {
-                            filter_keys=filter_keys+(filter_keys?',':'')+column+method;
-                            params[column]=$('#'+ctrl+'').val().replace(/;/g,'|');
-                        }
-                        else if (method)
-                        {
-                            filter_keys=filter_keys+(filter_keys?',':'')+column+method;
-                            params[column]=$('#'+ctrl+'').val();
-                        }
-                        else
-                        {
-                            params[column]=$('#'+ctrl+'').val();
-                        }
-                    }
+     function f_open_init(dialogData)
+     {
+         check_list = dialogData.checkbox;
 
-                }
-            }
-            if (params.filter_fmls && Fuzzy_Enquiry_cols)
-            {
-                params['filter_fmls']=params['filter_fmls']+' and ' +Fuzzy_Enquiry_cols;
-            }
-            else if (!params.filter_fmls && Fuzzy_Enquiry_cols)
-            {
-                params['filter_fmls']=Fuzzy_Enquiry_cols;
-            }
-            params['filter_keys']=filter_keys;
-            return params;
-        }
+         htmltext=''
+         for(var id in check_list)
+         {
+             if (check_list[id].ctrl) {
+                 ctrl=check_list[id].ctrl;
+                 if ($('#'+ctrl+'').length>0)
+                 {
+                     $('#'+ctrl+'').val(check_list[id].value);
+                 }
+                 else
+                 {
+                     htmltext=htmltext+'\n<input type="hidden" id="'+ctrl+'" value="'+check_list[id].value+'">'
+                 }
+             }
+         }
+         check_list = dialogData.inputbox;
+         for(var id in check_list)
+         {
+             if (check_list[id].ctrl)
+             {
+                 ctrl=check_list[id].ctrl;
+                 if ($('#'+ctrl+'').length>0)
+                 {
+                     $('#'+ctrl+'').val(check_list[id].value);
+                 }
+                 else
+                 {
+                     htmltext=htmltext+'\n<input type="hidden" id="'+ctrl+'" value="'+check_list[id].value+'">'
+                 }
+             }
+         }
+         if (htmltext)
+             $('#sel_hidden_fields').html(htmltext);
+     }
+     function f_open_option(dialogData)
+     {
+         params={};
+         filter_keys='';
+         check_list = dialogData.checkbox;
+         for(var id in check_list)
+         {
+             if (check_list[id].ctrl && check_list[id].column)
+             {
+                 ctrl=check_list[id].ctrl;
+                 column=check_list[id].column;
+                 method=check_list[id].method;
+                 if ('__iregex'==method)
+                 {
+                     filter_keys=filter_keys+(filter_keys?',':'')+column+method;
+                     params[column]=$('#'+ctrl+'').val().replace(/;/g,'|');
+                 }
+                 else if (method)
+                 {
+                     filter_keys=filter_keys+(filter_keys?',':'')+column+method;
+                     params[column]=$('#'+ctrl+'').val();
+                 }
+                 else
+                 {
+                     params[column]=$('#'+ctrl+'').val();
+                 }
+             }
+         }
+         Fuzzy_Enquiry_cols='';
+         check_list = dialogData.inputbox;
+         for(var id in check_list)
+         {
+             if (check_list[id].ctrl && check_list[id].column)
+             {
+                 ctrl=check_list[id].ctrl;
+                 column=check_list[id].column;
+                 columns=column.split(';');
+                 if (columns.length>1)
+                 {
+                     Fuzzy_Enquiry_cols=Fuzzy_Enquiry_cols+(Fuzzy_Enquiry_cols?' and ':'')+'('+column.replace(/;/g,' or ')+')';
+                 }
+                 method=check_list[id].method;
+                 for(var c in columns)
+                 {
+                     column=columns[c];
+                     if ('__iregex'==method)
+                     {
+                         filter_keys=filter_keys+(filter_keys?',':'')+column+method;
+                         params[column]=$('#'+ctrl+'').val().replace(/;/g,'|');
+                     }
+                     else if (method)
+                     {
+                         filter_keys=filter_keys+(filter_keys?',':'')+column+method;
+                         params[column]=$('#'+ctrl+'').val();
+                     }
+                     else
+                     {
+                         params[column]=$('#'+ctrl+'').val();
+                     }
+                 }
 
-        function f_open()
-        {
-            $.ligerDialog.open({
-                height:f_open_data.winheight,//380,
-                width: f_open_data.winwidth,//400,
-                title : 'Please Select the Column',
-                url: '/columns_data_select',
-                showMax: false,
-                showToggle: true,
-                showMin: false,
-                isResize: true,
-                slide: false,
-                onClose :function (item, dialog) { if (this.frame.isdirty) {f_toggleex();}},
-                onLoaded :function (item, dialog) { this.frame.set_dialog(this);},
-                buttons:[
-                    { text:'OK',
-                        onclick:function (item, dialog) {
-                            dialog.frame.f_ok();
-                            //f_toggleex();
-                            //dialog.close();
-                        }},
-                    { text: 'CLOSE', onclick: function (item, dialog) {dialog.close();}},
-                    ],
-                data:f_open_data,
-            });
-        }
+             }
+         }
+         if (params.filter_fmls && Fuzzy_Enquiry_cols)
+         {
+             params['filter_fmls']=params['filter_fmls']+' and ' +Fuzzy_Enquiry_cols;
+         }
+         else if (!params.filter_fmls && Fuzzy_Enquiry_cols)
+         {
+             params['filter_fmls']=Fuzzy_Enquiry_cols;
+         }
+         params['filter_keys']=filter_keys;
+         return params;
+     }
 
-        function f_toggleex()
-        {
-            f_toggle($("#selcolumn").val(),columns_all);
-            search('first');
-        }
-        function f_toggle(columns_sel,columns_all)
-        {
-            $("#selcolumn").val(columns_sel);
-            nmes=columns_all.split(';');
-            sels=columns_sel.split(';');
+     function f_open()
+     {
+         $.ligerDialog.open({
+             height:f_open_data.winheight,//380,
+             width: f_open_data.winwidth,//400,
+             title : 'Please Select the Column',
+             url: '/columns_data_select',
+             showMax: false,
+             showToggle: true,
+             showMin: false,
+             isResize: true,
+             slide: false,
+             onClose :function (item, dialog) { if (this.frame.isdirty) {f_toggleex();}},
+             onLoaded :function (item, dialog) { this.frame.set_dialog(this);},
+             buttons:[
+                 { text:'OK',
+                   onclick:function (item, dialog) {
+                       dialog.frame.f_ok();
+                       //f_toggleex();
+                       //dialog.close();
+                   }},
+                 { text: 'CLOSE', onclick: function (item, dialog) {dialog.close();}},
+             ],
+             data:f_open_data,
+         });
+     }
 
-            for (i=0,leni=nmes.length;i<leni;i++)
-            {
-                isshow=false;
-                for (j=0,lenj=sels.length;j<lenj;j++)
-                {
-                    if (nmes[i]==sels[j])
-                    {
-                        isshow=true;break;
-                    }
-                }
-                g.toggleCol(nmes[i], isshow);
-            }
-        }
+     function f_toggleex()
+     {
+         f_toggle($("#selcolumn").val(),columns_all);
+         search('first');
+     }
+     function f_toggle(columns_sel,columns_all)
+     {
+         $("#selcolumn").val(columns_sel);
+         nmes=columns_all.split(';');
+         sels=columns_sel.split(';');
 
-        function myextend(des, src, override)
-        {
-            if(src instanceof Array)
-                {
-                    for(var i = 0, len = src.length; i < len; i++)
-                        extend(des, src[i], override);
-                }
-            for( var i in src)
-                {
-                    if(override || !(i in des))
-                        {
-                            des[i] = src[i];
-                        }
-                }
-            return des;
-        }
-        var select_ids='';
-        function search(ctype, op)
-        {
-            select_ids = f_save_checkin();
-            var params = {
-                            sortorder:g.options.sortOrder,
-                            sortname:g.options.sortName,
-                            page: g.options.page,
-                            pagesize:g.options.pageSize
-            };
-            f_open_params=f_open_option(f_open_data);
-                        //myalertjson(f_open_params);
-            params=myextend(f_open_params,params);
+         for (i=0,leni=nmes.length;i<leni;i++)
+         {
+             isshow=false;
+             for (j=0,lenj=sels.length;j<lenj;j++)
+             {
+                 if (nmes[i]==sels[j])
+                 {
+                     isshow=true;break;
+                 }
+             }
+             g.toggleCol(nmes[i], isshow);
+         }
+     }
 
-            g.setOptions({parms : params});
-            g.loadServerData(params);
-            if (ctype)
-                g.changePage(ctype);
-        }
-        var intclock=0;
+     function myextend(des, src, override)
+     {
+         if(src instanceof Array)
+         {
+             for(var i = 0, len = src.length; i < len; i++)
+                 extend(des, src[i], override);
+         }
+         for( var i in src)
+         {
+             if(override || !(i in des))
+             {
+                 des[i] = src[i];
+             }
+         }
+         return des;
+     }
+     var select_ids='';
+     function search(ctype, op)
+     {
+         select_ids = f_save_checkin();
+         var params = {
+             sortorder:g.options.sortOrder,
+             sortname:g.options.sortName,
+             page: g.options.page,
+             pagesize:g.options.pageSize
+         };
+         f_open_params=f_open_option(f_open_data);
+         //myalertjson(f_open_params);
+         params=myextend(f_open_params,params);
 
-        function goodbye()
-        {
-            self.clearInterval(intclock);
-        }
+         g.setOptions({parms : params});
+         g.loadServerData(params);
+         if (ctype)
+             g.changePage(ctype);
+     }
+     var intclock=0;
+
+     function goodbye()
+     {
+         self.clearInterval(intclock);
+     }
+
+     function beginEdit() {
+         var row = manager.getSelectedRow();
+         if (!row) { alert('please select a line.'); return; }
+         manager.beginEdit(row);
+     }
+
+     function cancelEdit() {
+         var row = manager.getSelectedRow();
+         if (!row) { alert('please select a line.'); return; }
+         manager.cancelEdit(row);
+     }
+
+     function endEdit()
+     {
+         var row = manager.getSelectedRow();
+         if (!row) { alert('please select a line.'); return; }
+         manager.endEdit(row);
+         if (!row.note) { alert('Can NOT submit space chars of all content.'); return; }
+
+         $.get('/special_note/', {'note' : row.note,
+                                  'platform' : row.platform,
+                                  'ERD_ID' : row.erd_id,
+                                  'case_name' : row.case_name,
+                                  'fw_version' : row.fw_version,
+                                  'test_date' : row.test_date});
+     }
+
     </script>
 </head>
 <body style="padding:6px; overflow:hidden; " onunload="goodbye()">
@@ -369,6 +392,11 @@
             </tr>
         </table>
     </form>
+
+    <a class="l-button" style="width:80px;float:left; margin-left:6px;" onclick="beginEdit()">Edit NOTE</a>
+    <a class="l-button" style="width:80px;float:left; margin-left:6px;" onclick="endEdit()">Submit</a>
+    <a class="l-button" style="width:80px;float:left; margin-left:6px;" onclick="cancelEdit()">Cancel</a>
+    <div class="l-clear"></div>
 
     <div id="maingrid4" style="margin:0; padding:0"></div>
 
