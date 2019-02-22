@@ -1,7 +1,0 @@
-# Cron-jobs for ACIS DB backup.
-#* * * * * bash /mnt/sda2/rzheng/__mzLinux__/crontab_dev/jenkins_backup_dealer.sh
-
-SHELL=/bin/bash
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-
-45 22 * * * bash /home/rex/.mz/scripts/acis_db_backup.sh

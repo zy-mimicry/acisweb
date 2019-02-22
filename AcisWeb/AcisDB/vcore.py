@@ -986,7 +986,6 @@ class TestReportQuery(Query):
                 else:
                     trl = tc.testreports_set.all()
 
-
                 for tr in trl:
 
                     # Hope pick out all test report objects.

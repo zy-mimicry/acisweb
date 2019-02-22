@@ -72,9 +72,6 @@ def about(request):
 def query(request):
     return render(request, 'LigerUI/ACIS/query.htm', {})
 
-# def bug_effectiveness_chart(request):
-#     return render(request, 'LigerUI/ACIS/bug_effectiveness_chart.htm', {})
-
 
 def query_switch(request):
     if request.method == "GET":
@@ -266,7 +263,12 @@ def special_note(request):
     return HttpResponse('#')
 
 
-REMOTE_HOST = "https://pyecharts.github.io/assets/js"
+# We will download the pyecharts static library to the local,
+# if you need to update, please go to the official website to view.
+# ref: "https://pyecharts.github.io/assets/js".
+
+# REMOTE_HOST = "https://pyecharts.github.io/assets/js" << Online temporary usage.
+REMOTE_HOST = "../../LigerUI/ACIS/js"
 
 
 def bug_effectiveness_chart(request):
@@ -397,15 +399,13 @@ def BSC_generator_baseon_day(platform, trs, cursor):
         v2.append(invalid_counter)
 
     bar = BSC_format("Stack Chart base on each Day"
-                     "".format(platform), attr, v1, v2)
+                     "<{}>".format(platform), attr, v1, v2)
     return bar
 
 
 def BSC_generator_baseon_campaign(platform, trs, cursor):
-    # The raw materials needed to generate the form.
     attr = list(); v1 = list(); v2 = list()
     bar = None
-
 
     for c in cursor[platform]:
         attr.append("{}".format(c))
@@ -427,7 +427,7 @@ def BSC_generator_baseon_campaign(platform, trs, cursor):
         v2.append(invalid_counter)
 
     bar = BSC_format("Stack Chart base on each TestCampaign"
-                     "".format(platform), attr, v1, v2)
+                     "<{}>".format(platform), attr, v1, v2)
     return bar
 
 def is_note_format(note):
@@ -449,12 +449,10 @@ def BSC_format(title, attr, v1, v2):
 
     bar = Bar(title,
               width=800, height=450,
-              extra_html_text_label=["-- <span style='border:2px #04B431 solid;"
-                                     "font-size:12px;background-color:#FA5858;'>"
-                                     "Red Bar</span> is [valid] <br />"
-                                     "-- <span style='border:2px #04B431 solid;"
-                                     "font-size:12px;background-color:#0489B1;'>"
-                                     "Blue Bar</span> is [invalid]"])
+              extra_html_text_label=["<span style='font-size:12px;background-color:#D13232;'>"
+                                     "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;[valid] <br />"
+                                     "<span style='font-size:12px;background-color:#0B4C5F;'>"
+                                     "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;[invalid]"])
 
     bar.add("", attr, v1,
             is_stack=True,
