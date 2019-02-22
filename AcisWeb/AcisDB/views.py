@@ -470,3 +470,20 @@ def BSC_format(title, attr, v1, v2):
             xaxis_rotate=15,
             yaxis_rotate=15,)
     return bar
+
+
+def slave_details(request):
+    import jenkins
+
+    # Get jenkins all nodes information.
+    server = jenkins.Jenkins('http://cnshz-ed-svr098:8080', username='mzpython', password='123')
+    slave_pi_nodes = server.get_nodes()
+    info_of_nodes = {}
+    for node in slave_pi_nodes:
+        if node['name'] == 'master': continue # ignore this node
+        info_of_nodes[node['name']] = server.get_node_info(node['name'])
+
+    # Read share-NFS file and get the slave info.(we assume that is dynamic)
+
+
+    return render(request, 'LigerUI/ACIS/slave_details.htm', {})

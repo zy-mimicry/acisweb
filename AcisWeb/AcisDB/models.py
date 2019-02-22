@@ -108,3 +108,25 @@ class ProjectSnapshot(models.Model):
     def __str__(self):
         display = "< {}_{}_{} >".format(self.platform, self.date, self.tag)
         return display
+
+class SlaveStaticInfo(models.Model):
+    """
+    ACIS Slave node static information that be added manually.
+    """
+    img_version = models.CharField(max_length=20)
+    birthday = models.CharField(max_length=20)
+    hostname = models.CharField(max_length=40)
+    mac_addr = models.CharField(max_length=45)
+    remove_status = models.BooleanField()
+    dead_date = models.CharField(max_length=25)
+
+class DutStaticInfo(models.Model):
+    """
+    ACIS DUT static information that be added manually.
+    """
+    usb_ser = models.CharField(max_length=20)
+    birthday = models.CharField(max_length=20)
+    FSN = models.CharField(max_length=20)
+    remove_status = models.CharField(max_length=20)
+    dead_date = models.CharField(max_length=25)
+    slave_mac_addr = models.CharField(max_length=30)
