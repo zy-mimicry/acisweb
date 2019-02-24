@@ -62,10 +62,8 @@ ROOT_URLCONF = 'AcisWeb.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        #'DIRS': [],
-        'DIRS': [os.path.join(BASE_DIR, 'templates'),
-                 '/mnt/sda2/rzheng/__mzPython__/work/PRI/tmp/AcisWeb/templates'],
-        'APP_DIRS': True,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': False,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -135,4 +133,5 @@ USE_TZ = True
 
 #STATIC_URL = '/static/'
 STATIC_URL = '/LigerUI/'
-STATICFILES_DIRS = (os.path.join(os.path.dirname(__file__), '../templates/LigerUI').replace('\\','/'),)
+#STATICFILES_DIRS = (os.path.join(os.path.dirname(__file__), '../templates/LigerUI').replace('\\','/'),)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'templates/LigerUI').replace('\\','/'),)
