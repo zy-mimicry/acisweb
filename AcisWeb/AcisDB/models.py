@@ -115,7 +115,7 @@ class SlaveStaticInfo(models.Model):
     """
     img_version = models.CharField(max_length=20)
     birthday = models.CharField(max_length=20)
-    hostname = models.CharField(max_length=40)
+    hostname = models.CharField(max_length=40) # same as node name
     mac_addr = models.CharField(max_length=45)
     remove_status = models.BooleanField()
     dead_date = models.CharField(max_length=25)

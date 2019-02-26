@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Slave Details</title>
+</head>
+<body>
+    <h1>Slave Information</h1>
+    <hr/>
+
+    {% for node_name, node_info in info.items %}
+    <h2> {{ node_name }} </h2>
+    <ul>
+
+        {% for item,content in node_info.items %}
+
+            {% ifequal item 'DUTs' %}
+
+            <li> {{ item }} </li>
+            <ul>
+            {% for port_type, port_desc in content.items %}
+                <li> {{ port_type }} </li>
+                <ul>
+                {% for desc,value in port_desc.items %}
+                    <li> {{ desc }} : {{ value }}</li>
+                {% endfor %}
+                </ul>
+            {% endfor %}
+
+            </ul>
+
+            {% else %}
+
+            <li> {{ item }} : {{ content }} </li>
+
+            {% endifequal %}
+        {% endfor %}
+
+    </ul>
+    {% endfor %}
+</body>
+</html>

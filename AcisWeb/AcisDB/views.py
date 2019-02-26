@@ -12,7 +12,7 @@ from pprint import pprint as pp, pformat
 from operator import itemgetter
 from itertools import groupby
 from pyecharts import Bar
-from collections import defaultdict
+from collections import defaultdict,OrderedDict
 import math,random
 
 from . import log
@@ -475,15 +475,54 @@ def BSC_format(title, attr, v1, v2):
 def slave_details(request):
     import jenkins
 
-    # Get jenkins all nodes information.
     server = jenkins.Jenkins('http://cnshz-ed-svr098:8080', username='mzpython', password='123')
     slave_pi_nodes = server.get_nodes()
-    info_of_nodes = {}
+
+    slave_info_re = re.compile(r'\s*<slave info>\s*\[\s*(.*?)\s*\]\s*:\s*\[\s*(.*?)\s*\]\s*\[\s*(.*?)\s*\]')
+    dut_info_re = re.compile(r'\s*<dut info>\s*\[\s*(.*?)\s*:\s*(.*?)\]\s*\[\s*(.*?)\s*:\s*(.*?)\s*\]\s*\[\s*(.*?)\s*:\s*(.*?)\s*\]')
+
+    info = {}
+    online_node_names = []
+
+    # this on line nodes is RunTime, but file store content maybe not match.
+    # anyway, we hope pop offline node and NOT get its info.
     for node in slave_pi_nodes:
-        if node['name'] == 'master': continue # ignore this node
-        info_of_nodes[node['name']] = server.get_node_info(node['name'])
+        if node['name'] == 'master' or \
+           node['name'] == 'rasp-bsp-9x28' or \
+           node['name'] == 'rasp-bsp-9x40':
+            continue
+        if not node['offline']:
+            online_node_names.append(node['name'])
 
-    # Read share-NFS file and get the slave info.(we assume that is dynamic)
+    #info_dir = '/home/rex/nfs_acis/Slave-Info/'
+    info_dir = '/home/rex/temp/Slave-Info/'
+    # get the latest slave info from the latest directory
+    latest = max(os.listdir(info_dir))
 
+    node_names = os.listdir(info_dir + latest)
+    not_fetch_node_names = set(node_names) - set(online_node_names)
+    fetch_node_names = list(set(node_names) - set(not_fetch_node_names))
 
-    return render(request, 'LigerUI/ACIS/slave_details.htm', {})
+    for node_name in fetch_node_names:
+        info[node_name] = {}
+        info[node_name]['DUTs'] = {}
+
+        info_file = info_dir + latest + '/' + node_name +'/slave_info.log'
+        with open(info_file, 'r') as f:
+            for line in f:
+                g_of_slave = slave_info_re.match(line)
+                if g_of_slave:
+                    # example: <slave info> [slave_root_space_total   ]: [status:0   ] [30G]
+                    info[node_name]['slave_info_' + g_of_slave.group(1)] = g_of_slave.group(3)
+
+                g_of_dut = dut_info_re.match(line)
+                if g_of_dut:
+                    # example: <dut info> [path: acis/DUT2/AT] [usb_serial: fdf5a6b3] [status: READY]
+                    dut_name = g_of_dut.group(2).split('/')[1]
+                    info[node_name]['DUTs'][dut_name] = {}
+                    info[node_name]['DUTs'][dut_name]['dut_info_' + g_of_dut.group(1)] = g_of_dut.group(2)
+                    info[node_name]['DUTs'][dut_name]['dut_info_' + g_of_dut.group(3)] = g_of_dut.group(4)
+                    info[node_name]['DUTs'][dut_name]['dut_info_' + g_of_dut.group(5)] = g_of_dut.group(6)
+    pp(info)
+
+    return render(request, 'LigerUI/ACIS/slave_details_2.htm', {'info' : info})
