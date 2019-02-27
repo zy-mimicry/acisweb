@@ -118,7 +118,12 @@ class SlaveStaticInfo(models.Model):
     hostname = models.CharField(max_length=40) # same as node name
     mac_addr = models.CharField(max_length=45)
     remove_status = models.BooleanField()
-    dead_date = models.CharField(max_length=25)
+    dead_date = models.CharField(max_length=25, null=True, blank=True)
+    owner = models.CharField(max_length=30)
+
+    def __str__(self):
+        display = "< {}_{}_{} >".format(self.hostname, self.img_version, self.owner)
+        return display
 
 class DutStaticInfo(models.Model):
     """
@@ -127,6 +132,11 @@ class DutStaticInfo(models.Model):
     usb_ser = models.CharField(max_length=20)
     birthday = models.CharField(max_length=20)
     FSN = models.CharField(max_length=20)
-    remove_status = models.CharField(max_length=20)
-    dead_date = models.CharField(max_length=25)
+    remove_status = models.BooleanField()
+    dead_date = models.CharField(max_length=25, null=True, blank=True)
     slave_mac_addr = models.CharField(max_length=30)
+    owner = models.CharField(max_length=30)
+
+    def __str__(self):
+        display = "< {}_{}_{}_{} >".format(self.FSN, self.usb_ser, self.slave_mac_addr, self.owner)
+        return display

@@ -472,57 +472,94 @@ def BSC_format(title, attr, v1, v2):
     return bar
 
 
-def slave_details(request):
-    import jenkins
+from AcisDB.models import SlaveStaticInfo,DutStaticInfo
+import jenkins
 
-    server = jenkins.Jenkins('http://cnshz-ed-svr098:8080', username='mzpython', password='123')
+def get_all_valid_nodes():
+    """
+    Description
+    process steps
+    1. filter out all record that remove_status == False
+    2. get all nodes from Jenkins that cantains 'online' and 'offline'
+    3. previous two steps result in the intersection.
+      a) in model, but NOT in Jenkins (drop)
+      b) NOT in model, but in Jenkins (drop)
+      c) both in model and Jenkins:
+         c.1) Jenkins status offline ( show offline )
+         c.2) Jenkins status online  ( show dynamic info )
+    """
+    ssil = SlaveStaticInfo.objects.all().filter(remove_status = False)
+    nodes_from_model = [ ssi.hostname for ssi in ssil ]
+
+    server = jenkins.Jenkins('http://cnshz-ed-svr098:8080', username='acis', password='acis')
     slave_pi_nodes = server.get_nodes()
+    nodes_from_jenkins = [ node['name'] for node in slave_pi_nodes ]
+    nodes_intersection = set(nodes_from_model) & set(nodes_from_jenkins)
+
+    nodes_with_status = []
+    for index,slave_pi in enumerate(slave_pi_nodes):
+        if slave_pi['name'] in nodes_intersection:
+            nodes_with_status.append(slave_pi)
+
+    return nodes_with_status
+
+
+def slave_details(request):
+
+    nodes = get_all_valid_nodes()
+    info = {}
 
     slave_info_re = re.compile(r'\s*<slave info>\s*\[\s*(.*?)\s*\]\s*:\s*\[\s*(.*?)\s*\]\s*\[\s*(.*?)\s*\]')
     dut_info_re = re.compile(r'\s*<dut info>\s*\[\s*(.*?)\s*:\s*(.*?)\]\s*\[\s*(.*?)\s*:\s*(.*?)\s*\]\s*\[\s*(.*?)\s*:\s*(.*?)\s*\]')
-
-    info = {}
-    online_node_names = []
-
-    # this on line nodes is RunTime, but file store content maybe not match.
-    # anyway, we hope pop offline node and NOT get its info.
-    for node in slave_pi_nodes:
-        if node['name'] == 'master' or \
-           node['name'] == 'rasp-bsp-9x28' or \
-           node['name'] == 'rasp-bsp-9x40':
-            continue
-        if not node['offline']:
-            online_node_names.append(node['name'])
-
-    #info_dir = '/home/rex/nfs_acis/Slave-Info/'
     info_dir = '/home/rex/temp/Slave-Info/'
-    # get the latest slave info from the latest directory
-    latest = max(os.listdir(info_dir))
 
-    node_names = os.listdir(info_dir + latest)
-    not_fetch_node_names = set(node_names) - set(online_node_names)
-    fetch_node_names = list(set(node_names) - set(not_fetch_node_names))
+    for node in nodes:
+        info[node['name']] = {}
+        static_info = info[node['name']]['static'] = {}
 
-    for node_name in fetch_node_names:
-        info[node_name] = {}
-        info[node_name]['DUTs'] = {}
+        ssi = SlaveStaticInfo.objects.get(hostname = node['name'])
+        static_info['offline'] = node['offline']
+        for name,value in ssi.__dict__.items():
+            # Filter out the properties that are integrated by the parent class(model.Model).
+            if name not in ('id', '_state'):
+                static_info[name] = value
 
-        info_file = info_dir + latest + '/' + node_name +'/slave_info.log'
-        with open(info_file, 'r') as f:
-            for line in f:
-                g_of_slave = slave_info_re.match(line)
-                if g_of_slave:
-                    # example: <slave info> [slave_root_space_total   ]: [status:0   ] [30G]
-                    info[node_name]['slave_info_' + g_of_slave.group(1)] = g_of_slave.group(3)
+        static_info['DUTs'] = {}
+        dsil = DutStaticInfo.objects.all().\
+               filter(slave_mac_addr = ssi.mac_addr, remove_status = False)
 
-                g_of_dut = dut_info_re.match(line)
-                if g_of_dut:
-                    # example: <dut info> [path: acis/DUT2/AT] [usb_serial: fdf5a6b3] [status: READY]
-                    dut_name = g_of_dut.group(2).split('/')[1]
-                    info[node_name]['DUTs'][dut_name] = {}
-                    info[node_name]['DUTs'][dut_name]['dut_info_' + g_of_dut.group(1)] = g_of_dut.group(2)
-                    info[node_name]['DUTs'][dut_name]['dut_info_' + g_of_dut.group(3)] = g_of_dut.group(4)
-                    info[node_name]['DUTs'][dut_name]['dut_info_' + g_of_dut.group(5)] = g_of_dut.group(6)
-    pp(info)
+        for dsi in dsil:
+            _si = static_info['DUTs'][dsi.FSN] = {}
+            for name,value in dsi.__dict__.items():
+                if name not in ('id', '_state'):
+                    _si[name] = value
 
-    return render(request, 'LigerUI/ACIS/slave_details_2.htm', {'info' : info})
+        dynamic_info = info[node['name']]['dynamic'] = {}
+        #info_dir = '/home/rex/nfs_acis/Slave-Info/'
+        info_dir = '/home/rex/temp/Slave-Info/'
+        latest = max(os.listdir(info_dir))
+        node_file_names = os.listdir(info_dir + latest)
+
+        if node['name'] not in node_file_names:
+            dynamic_info['UNKONWN'] = "Dut to NOT auto-generate info file yet :("
+        else:
+            dynamic_info['DUTs'] = {}
+
+            info_file = info_dir + latest + '/' + node['name'] +'/slave_info.log'
+            with open(info_file, 'r') as f:
+                for line in f:
+                    g_of_slave = slave_info_re.match(line)
+                    if g_of_slave:
+                        # example: <slave info> [slave_root_space_total   ]: [status:0   ] [30G]
+                        dynamic_info['slave_info_' + g_of_slave.group(1)] = g_of_slave.group(3)
+
+                    g_of_dut = dut_info_re.match(line)
+                    if g_of_dut:
+                        # example: <dut info> [path: acis/DUT2/AT] [usb_serial: fdf5a6b3] [status: READY]
+                        dut_name = g_of_dut.group(2).split('/')[1]
+                        dynamic_info['DUTs'][dut_name] = {}
+                        dynamic_info['DUTs'][dut_name]['dut_info_' + g_of_dut.group(1)] = g_of_dut.group(2)
+                        dynamic_info['DUTs'][dut_name]['dut_info_' + g_of_dut.group(3)] = g_of_dut.group(4)
+                        dynamic_info['DUTs'][dut_name]['dut_info_' + g_of_dut.group(5)] = g_of_dut.group(6)
+
+    return render(request, 'LigerUI/ACIS/slave_details.htm', {'info' : info})
