@@ -1,40 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test Campaign</title>
+	      <meta http-equiv="X-UA-Compatible" content="IE=8"/>
+        <link href="../../LigerUI/ACIS/static/css/bootstrap.css" rel="stylesheet" type="text/css">
+    </head>
 
-{% if latest_list %}
-<h2>Latest Test Campaign List</h2>
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="card">
+                    <div class="card-header">
+                        <h4 align="center" >Test Campaign List</h4>
+                    </div>
+                    {% if latest_list %}
+                    <div class="card-body">
+                    <ul class="list-group">
+                        {% for cam in latest_list %}
+                        <li class="list-group-item">
+                            <a href="/campaign_index/?platform={{cam.platform}}&fw_version={{cam.fw_version}}&test_date={{cam.test_date}}&description={{cam.description}}">
+                                <span class="badge badge-danger">{{ cam.fw_version }}</span>
+                                <span class="badge badge-primary">{{ cam.description }}</span>
+                                <span class="badge badge-success">{{ cam.test_date }}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    </div>
 
-<ul>
-    {% for cam in latest_list %}
-    <li> <a href="/campaign_index/?platform={{cam.platform}}&fw_version={{cam.fw_version}}&test_date={{cam.test_date}}&description={{cam.description}}">
-        <span style="color:red;font-weight:bold">{{ cam.fw_version }}</span>_
-        <span style="color:blue;font-weight:bold">{{ cam.description }}</span>_
-        <span style="color:green;font-weight:bold">{{ cam.test_date }}</span>
-    </a>
-    </li>
-    {% endfor %}
-</ul>
-{% else %}
-<p> No Test Campaign Show </p>
-{% endif %}
+                    {% else %}
+                    <div class="card-body">
+                        <li class="list-group-item">
+                            <p> No Test Campaign Show </p>
+                        </li>
+                    </div>
+                    {% endif %}
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4  align="left" >Test Campaign Query <span class="badge badge-pill badge-info">Fuzzy</span></h4>
+                        </div>
+                        <div class="card-body">
+                            <form class="form-row" action="/campaign_query" target="_self">
+                                <div class="form-group">
+                                    <label for="fw_version">FW version</label>
+                                    <input name="fw_version" type="text" class="form-control" id="fw_version" placeholder="any char of FW version">
+                                </div>
+                                <div class="form-group">
+                                    <label for="description">Description</label>
+                                    <input name="description" type="text" class="form-control" id="description" placeholder="any char of Description">
+                                </div>
+                                <div class="form-group">
+                                    <label for="test_date">Test Date</label>
+                                    <input name="test_date" type="text" class="form-control" id="test_date" placeholder="any char (number or letter)">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<br />
-<br />
-<br />
-<br />
-
-<h2> Test Campaign Query </h2>
-<form action="/campaign_query" target="_self">
-    <label> FW version: </label>
-    <br />
-    <input type="text" name='fw_version' />
-    <br />
-    <label> Description:  </label>
-    <br />
-    <input type="text" name='description' />
-    <br />
-    <label> Test Date:  </label>
-    <br />
-    <input type="text" name='test_date' />
-    <br />
-
-    <input type="submit" value="submit" />
-</form>
+        <script src="../../LigerUI/ACIS/static/js/jquery-3.3.1.js" type="text/javascript"></script>
+        <script src="../../LigerUI/ACIS/static/js/popper.js" type="text/javascript"></script>
+        <script src="../../LigerUI/ACIS/static/js/bootstrap.js" type="text/javascript"></script>
+    </body>
+</html>

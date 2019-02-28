@@ -75,60 +75,45 @@ def query(request):
 
 def query_switch(request):
     if request.method == "GET":
+        # if platform not pass, throw exception.
         platform = request.GET.get('platform').upper()
-        action = request.GET.get('action')
 
-        if action == 'ERD_table_version':
-            print("recored query:\n{}\n{}\n{}".format(platform,action,request.GET.get('ErdTableVersion')))
-            erd_table_version = request.GET.get('ErdTableVersion')
-
-            de = DefaultExtractor([platform])
-            vcore.splitter('pick_all', extractor = de )
-
-            out = de.ext_snapshot(platform = platform.upper(), spec_ver = erd_table_version)
-
-            return render(request, 'LigerUI/ACIS/ERD_page.htm', {'cookies' : json.dumps(out)})
-
-        elif action == 'integration_version':
-            fw_version = request.GET.get('FirmwareVersion')
-            ie = IntegrationExtractor([platform],fw_version = fw_version)
-            vcore.splitter('pick_all', extractor = ie )
-
-            return render(request, 'LigerUI/ACIS/integration_page.htm', {'cookies' : json.dumps(ie.UI_data)})
-
-        else:
-            return HttpResponseNotFound("<h2> Please input 'platform' and 'action' togather.</h2>")
-
-    elif request.method == "POST":
-        print("POST request, but do nothing.")
-
-
-def test_report_query_enter(request):
-    return render(request, 'LigerUI/ACIS/test_report_query.htm', {})
-
-
-def test_report_query(request):
-    if request.method == "GET":
-        platform = request.GET.get('platform')
-        action = request.GET.get('action')
-
-        if action == 'test_report_query':
+        if not ({'platform', 'FirmwareVersion','start_test_date', 'end_test_date'} - set(request.GET.keys())):
             fw_version = request.GET.get('FirmwareVersion')
             start_test_date = request.GET.get('start_test_date')
             end_test_date = request.GET.get('end_test_date')
-            q = vcore.TestReportQuery('test_report_query', platform=platform, fw_version=fw_version,
-                            start_test_date=start_test_date, end_test_date=end_test_date)
-        elif action == 'ERD':
-            ERD_ID = request.GET.get('ERD_ID')
-            q = vcore.TestReportQuery("ERD_caselist_query",  platform=platform, ERD_ID=ERD_ID)
-        elif action == 'case_name':
-            casename = request.GET.get('case_name')
-            q = vcore.TestReportQuery("casename_query",  platform=platform, casename=casename)
-        else:
-            return HttpResponseNotFound("<h2> Please input 'platform' and 'action' togather.</h2>")
+            UI_data = vcore.TestReportQuery('test_report_query', platform=platform,
+                                      fw_version=fw_version,
+                                      start_test_date=start_test_date,
+                                      end_test_date=end_test_date).test_report_data()
+            return render(request, 'LigerUI/ACIS/integration_page.htm', {'cookies': json.dumps(UI_data)})
 
-        UI_data = q.test_report_data()
-        return render(request, 'LigerUI/ACIS/integration_page.htm', {'cookies': json.dumps(UI_data)})
+        elif not ({'ErdTableVersion'} - set(request.GET.keys())):
+            erd_table_version = request.GET.get('ErdTableVersion')
+            de = DefaultExtractor([platform])
+            vcore.splitter('pick_all', extractor = de )
+            out = de.ext_snapshot(platform = platform.upper(), spec_ver = erd_table_version)
+            return render(request, 'LigerUI/ACIS/ERD_page.htm', {'cookies' : json.dumps(out)})
+
+        elif not ({'ERD_ID'} - set(request.GET.keys())):
+            ERD_ID = request.GET.get('ERD_ID')
+            UI_data = vcore.TestReportQuery("ERD_caselist_query",
+                                            platform=platform,
+                                            ERD_ID=ERD_ID).test_report_data()
+            return render(request, 'LigerUI/ACIS/integration_page.htm', {'cookies': json.dumps(UI_data)})
+
+        elif not ({'case_name'} - set(request.GET.keys())):
+            casename = request.GET.get('case_name')
+            UI_data = vcore.TestReportQuery("casename_query",
+                                            platform=platform,
+                                            casename=casename).test_report_data()
+            return render(request, 'LigerUI/ACIS/integration_page.htm', {'cookies': json.dumps(UI_data)})
+
+        else:
+            return HttpResponseNotFound("<h2> Please input valid information in form.</h2>")
+
+    elif request.method == "POST":
+        print("POST request, but do nothing.")
 
 
 def do_save_excel(platform, version, erd_excel_file):

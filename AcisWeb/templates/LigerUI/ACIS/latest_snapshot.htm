@@ -1,40 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test Campaign</title>
+	      <meta http-equiv="X-UA-Compatible" content="IE=8"/>
+        <link href="../../LigerUI/ACIS/static/css/bootstrap.css" rel="stylesheet" type="text/css">
+    </head>
 
-{% if latest_list %}
-<h2>Latest Project Snapshot List</h2>
+    <body>
 
-<ul>
-    {% for snap in latest_list %}
-    <li> <a href="/snapshot_index/?platform={{ snap.platform }}&date={{ snap.date }}&tag={{ snap.tag }}">
-        <span style="color:red;font-weight:bold">{{ snap.platform }}</span>_
-        <span style="color:blue;font-weight:bold">{{ snap.date }}</span>_
-        <span style="color:green;font-weight:bold">{{ snap.tag }}</span>
-    </a></li>
-    {% endfor %}
-</ul>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="card">
+                    <div class="card-header">
+                        <h4 align="center" >Latest Project Snapshot List></h4>
+                    </div>
+                    {% if latest_list %}
+                    <div class="card-body">
+                    <ul class="list-group">
+                        {% for snap in latest_list %}
+                        <li class="list-group-item">
+                            <a href="/snapshot_index/?platform={{ snap.platform }}&date={{ snap.date }}&tag={{ snap.tag }}">
+                                <span class="badge badge-danger">{{ snap.platform }}</span>
+                                <span class="badge badge-primary">{{ snap.date }}</span>
+                                <span class="badge badge-success">{{ snap.tag }}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    </div>
 
-{% else %}
-<p> No Project Snapshot Show </p>
-{% endif %}
+                    {% else %}
+                    <div class="card-body">
+                        <li class="list-group-item">
+                            <p> No Project Snapshot Show </p>
+                        </li>
+                    </div>
+                    {% endif %}
+                    </div>
+                </div>
 
-<br />
-<br />
-<br />
-<br />
 
-<h2> Project Snapshot Query </h2>
-<form action="/snapshot_query" target="_self">
-    <label> Platform: </label>
-    <br />
-    <input type="text" name='platform' />
-    <br />
-    <label> Shot Date:  </label>
-    <br />
-    <input type="text" name='date' />
-    <br />
-    <label> Tag:  </label>
-    <br />
-    <input type="text" name='tag' />
-    <br />
+                <div class="col-sm-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4  align="left" >Project Snapshot Query <span class="badge badge-pill badge-info">Fuzzy</span></h4>
+                        </div>
+                        <div class="card-body">
+                            <form class="form-row" action="/snapshot_query" target="_self">
+                                <div class="form-group">
+                                    <label for="platform">Platform</label>
+                                    <input name="platform" type="text" class="form-control" id="platform" placeholder="any char of FW version">
+                                </div>
+                                <div class="form-group">
+                                    <label for="date">Shot Date</label>
+                                    <input name="date" type="text" class="form-control" id="date" placeholder="any char of Description">
+                                </div>
+                                <div class="form-group">
+                                    <label for="tag">Tag</label>
+                                    <input name="tag" type="text" class="form-control" id="tag" placeholder="any char (number or letter)">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <input type="submit" value="submit" />
-</form>
+        <script src="../../LigerUI/ACIS/static/js/jquery-3.3.1.js" type="text/javascript"></script>
+        <script src="../../LigerUI/ACIS/static/js/popper.js" type="text/javascript"></script>
+        <script src="../../LigerUI/ACIS/static/js/bootstrap.js" type="text/javascript"></script>
+    </body>
+</html>
