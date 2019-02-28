@@ -7,7 +7,7 @@
     </head>
 
     <body>
-        <div class="container-fluid">
+        <div class="container-fluid pt-4">
             <div class="row">
                 <div class="col-sm-8">
                     <div class="card">
@@ -43,8 +43,8 @@
                         <div class="card-header">
                             <h4  align="left" >Test Campaign Query <span class="badge badge-pill badge-info">Fuzzy</span></h4>
                         </div>
-                        <div class="card-body">
-                            <form class="form-row" action="/campaign_query" target="_self">
+                        <form class="form-row" action="/campaign_query" target="_self">
+                            <div class="card-body">
                                 <div class="form-group">
                                     <label for="fw_version">FW version</label>
                                     <input name="fw_version" type="text" class="form-control" id="fw_version" placeholder="any char of FW version">
@@ -58,8 +58,8 @@
                                     <input name="test_date" type="text" class="form-control" id="test_date" placeholder="any char (number or letter)">
                                 </div>
                                 <button type="submit" class="btn btn-primary">Submit</button>
-                            </form>
-                        </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
