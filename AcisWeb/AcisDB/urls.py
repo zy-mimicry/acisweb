@@ -38,9 +38,6 @@ urlpatterns = [
     path('query/', views.query, name = "query"),
     path('query/switch/', views.query_switch, name = "switch"),
 
-    # path('test_report_query/',    views.test_report_query_enter,    name = "test_report_query"),
-    # path('test_report_query/switch/',    views.test_report_query,    name = "test_report_query_switch"),
-
     path('jenkins_handler/', views.jenkins_handler, name = "jenkins_handler"),
 
     path('campaign/', views.campaign, name = "latest_campaign"),

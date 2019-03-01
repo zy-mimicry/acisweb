@@ -5,14 +5,49 @@
     <title>ACIS Home Page</title>
 	  <meta http-equiv="X-UA-Compatible" content="IE=8"/>
     <link href="../../LigerUI/ACIS/static/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <style>
+     .bd-placeholder-img {
+         font-size: 1.125rem;
+         text-anchor: middle;
+         -webkit-user-select: none;
+         -moz-user-select: none;
+         -ms-user-select: none;
+         user-select: none;
+     }
+
+     @media (min-width: 768px) {
+         .bd-placeholder-img-lg {
+             font-size: 3.5rem;
+         }
+     }
+
+     html {
+         font-size: 14px;
+     }
+
+     @media (min-width: 768px) {
+         html {
+             font-size: 16px;
+         }
+     }
+
+     .container {
+         max-width: 960px;
+     }
+
+     .pricing-header {
+         max-width: 700px;
+     }
+
+     .card-deck .card {
+         min-width: 220px;
+     }
+    </style>
 </head>
 <body>
 
     <nav class="navbar navbar-light bg-light">
         <a class="navbar-brand">Welcome</a>
-        <span class="navbar-text"">
-            hope it will bring you convenience ^_^
-        </span>
         <form class="form-inline">
             <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
@@ -21,28 +56,90 @@
 
     <nav>
         <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Gallery</a>
-            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Document</a>
-            <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">About</a>
+            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab"
+               href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Home</a>
+
+            <a class="nav-item nav-link" id="nav-doc-tab" data-toggle="tab"
+               href="#nav-doc" role="tab" aria-controls="nav-doc" aria-selected="false">Document</a>
+
+            <a class="nav-item nav-link" id="nav-about-tab" data-toggle="tab"
+               href="#nav-about" role="tab" aria-controls="nav-about" aria-selected="false">About</a>
+
+            <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab"
+               href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Contact</a>
         </div>
     </nav>
 
     <div class="tab-content" id="nav-tabContent">
         <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
-            <div class="container-fluid pt-4">
-                <div class="row">
-                    <div class="col-sm-3"></div>
-                    <div class="col-sm-6">
+            <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+                <h1 class="display-4">ACIS</h1>
+                <p class="lead">
+                    ACIS full name Automatic Continuous Integration System, an automated test system that focuses on testing around the SWI-Module.
+                    The ACIS web is part of the ACIS system and plays the role of data display, node monitoring and problem tracking etc...
+                </p>
+            </div>
+            <div class="container">
+                <div class="card-deck mb-3 text-center">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header">
+                            <h4 class="my-0 font-weight-normal">Vision</h4>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mt-3 mb-4">
+                                <li>
+                                    <h4 class="card-title pricing-card-title"> Once development, always avaialbe</h4>
+                                </li>
+                                <li>
+                                    <h4 class="card-title pricing-card-title"> One developer, mulitple projects </h4>
+                                </li>
+                            </ul>
+                            <a href="https://confluence.sierrawireless.com/display/FWA/ACIS+-+Automatic+Continuous+Integration+System"
+                               target="_blank"
+                               class="btn btn-primary btn-lg" role="button" aria-pressed="true" >Learn More</a>
+                        </div>
+                    </div>
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header">
+                            <h4 class="my-0 font-weight-normal">Goals</h4>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mt-3 mb-4" >
+                                <li> FW Developers Run Functional Test</li>
+                                <li> FW Integrators Run Integration Test</li>
+                                <li> FW Integrators Run Regression Test</li>
+                                <li> Project lead monitor project milestone</li>
+                                <li> FW Integrators Merge Patch Automatically</li>
+                                <li> ACIS maintainer monitor ACIS status</li>
+                            </ul>
+                            <a href="https://confluence.sierrawireless.com/display/FWA/ACIS%3A+Requirements+Analysis"
+                               target="_blank"
+                               class="btn btn-primary btn-lg" role="button" aria-pressed="False" >Check Out</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-deck mb-3 text-center">
+                    <div class="container-fluid pt-4">
+                        <h3>Overview Gallery</h3>
                         <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
                             <div class="carousel-inner">
                                 <div class="carousel-item active">
-                                    <img src="../../LigerUI/ACIS/static/image/cat.jpg" class="d-block w-100" alt="...">
+                                    <img src="../../LigerUI/ACIS/static/image/snapshot_query.png" class="d-block w-100" alt="...">
                                 </div>
                                 <div class="carousel-item">
-                                    <img src="../../LigerUI/ACIS/static/image/dog.jpg" class="d-block w-100" alt="...">
+                                    <img src="../../LigerUI/ACIS/static/image/testcampaign_query.png" class="d-block w-100" alt="...">
                                 </div>
                                 <div class="carousel-item">
-                                    <img src="../../LigerUI/ACIS/static/image/mouse.jpg" class="d-block w-100" alt="...">
+                                    <img src="../../LigerUI/ACIS/static/image/test_report_query.png" class="d-block w-100" alt="...">
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="../../LigerUI/ACIS/static/image/ERD_table.png" class="d-block w-100" alt="...">
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="../../LigerUI/ACIS/static/image/bug_effectiveness.png" class="d-block w-100" alt="...">
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="../../LigerUI/ACIS/static/image/test_report.png" class="d-block w-100" alt="...">
                                 </div>
                             </div>
                             <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
@@ -55,18 +152,109 @@
                             </a>
                         </div>
                     </div>
-                    <div class="col-sm-3"></div>
                 </div>
             </div>
         </div>
-        <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
-            The ACIS web is part of the ACIS system and plays the role of data display, node monitoring and problem tracking.
+
+        <div class="tab-pane fade" id="nav-doc" role="tabpanel" aria-labelledby="nav-doc-tab">
+            <div class="container px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+                <div class="card">
+                    <div class="card-header">
+                        <h3> ACIS Work Instruction </h3>
+                    </div>
+                    <div class="card-body">
+
+                        <h5 class="card-title">Top Level Doc</h5>
+                        <p class="card-text">
+                            The documentation contains all the details for ACIS and all the knowledge is available.
+                        </p>
+                        <a href="https://confluence.sierrawireless.com/display/FWA/ACIS%3A+Work+Instruction"
+                           target="_blank"
+                           class="btn btn-primary">Peer</a>
+
+                        <ul class="list-group list-group-flush pt-4 pl-10" align="left">
+                            <li class="list-group-item">
+                                <nav class="navbar navbar-light bg-light">
+                                    <a class="navbar-brand">For FW Developer</a>
+                                    <form class="form-inline">
+                                        <a href="https://confluence.sierrawireless.com/display/FWA/For+FW+Developer"
+                                           target="_blank"
+                                           align="right"
+                                           class="btn btn-primary">Go</a>
+                                    </form>
+                                </nav>
+                            </li>
+                            <li class="list-group-item">
+                                <nav class="navbar navbar-light bg-light">
+                                    <a class="navbar-brand">For Project Lead</a>
+                                    <form class="form-inline">
+                                        <a href="https://confluence.sierrawireless.com/display/FWA/For+Project+Lead"
+                                           target="_blank"
+                                           align="right"
+                                           class="btn btn-primary">Go</a>
+                                    </form>
+                                </nav>
+                            </li>
+                            <li class="list-group-item">
+                                <nav class="navbar navbar-light bg-light">
+                                    <a class="navbar-brand">For ACIS Administrator</a>
+                                    <form class="form-inline">
+                                        <a href="https://confluence.sierrawireless.com/display/FWA/For+ACIS+Administrator"
+                                           target="_blank"
+                                           align="right"
+                                           class="btn btn-primary">Go</a>
+                                    </form>
+                                </nav>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <div class="tab-pane fade" id="nav-about" role="tabpanel" aria-labelledby="nav-about-tab">
+            <div class="container px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+
+                <div class="card-deck mb-3 text-center">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3> ACIS Release Note List</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush pt-4 pl-10">
+                                <li class="list-group-item">
+                                    ACIS release note
+                                    <a href="https://confluence.sierrawireless.com/display/FWA/ACIS%3A+Release+Notes"
+                                       target="_blank"
+                                       class="badge badge-success">ACIS_02.00.00</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
-            .
+            <div class="container px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+                <div class="card-deck mb-3 text-center">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">@</span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="basic-addon2">@sierrawireless.com</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
 
     <script src="../../LigerUI/ACIS/static/js/jquery-3.3.1.js" type="text/javascript"></script>
     <script src="../../LigerUI/ACIS/static/js/popper.js" type="text/javascript"></script>

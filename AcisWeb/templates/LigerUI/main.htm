@@ -485,18 +485,12 @@
             | Menu:
             <input type='button' onclick='tab.removeAll();' value='Close All Tab'/>
             <input type='button' onclick='f_open_innewwin();' value=' Open In NewWin '/>
-            <!-- <input type='button' onclick='f_getTab_filter();' value=' Query '/> -->
-            <!-- <select id="op_menu"  style='width:200px;'> -->
-            <!-- <option value="">Please select your operation:</option> -->
-            <!-- </select> -->
-            <!-- search: <input type='text' onclick='f_getTab_updatefuzzyqnquiry();' value='' id='selFuzzyEnquiry' onkeyup='mykeypress_fuzzyqnquiry();' style='width:200px;' title="search Ticket Id should include '-' as preText, example: [-8427], searh special column should be [Components:Ar755]" /> -->
         </div>
         <div class="l-topmenu-welcome">
             <a href="#" class="l-link2"" onclick="$.ligerDialog.open({ title:'PRI_System login',width: 400,height: 300,url: '/login/' });;return false;">login</a>
             <span class="space">|</span>
             <a href="#" class="l-link2" onclick="$.ligerDialog.confirm('Do you want to logout?','Tips', function (yes) { if (yes) $.ligerDialog.open({ title:'PRI_System login',width: 400,height: 300,url: '/login/?op=logout' }); });return false;return false;">login out</a>
             <span class="space">|</span>
-            <!-- <span style="color:#eeeeee">Only Support </span><a href="../LigerUI/tools/ChromeStandaloneSetup64.exe" >Chrome</a> -->
         </div>
     </div>
 
@@ -522,7 +516,7 @@
                             <li><span><a href="javascript:f_addTab('Snapshot', 'Project Snapshot','/snapshot/')">Project Snapshot</a></span></li>
                             <li><span><a href="javascript:f_addTab('slave_details','Test Slave Monitor','/slave_details/')">Test Slave Monitor</a></span></li>
                             <li><span><a href="javascript:f_addTab('bug_effectiveness_chart','Bug Effectiveness Chart','/bug_effectiveness_chart/')">Bug Effectiveness</a></span></li>
-                            <li><span><a href="javascript:f_addTab('Commands','Admin Commands','/commands/')">Admin Commands</a></span></li>
+                        </ul>
                     </li>
                     <li isexpand="true">
                         <span>External Link</span>
@@ -534,10 +528,22 @@
                 </ul>
             </div>
 
+            <div title="Admin & Debug">
+                <div style=" height:7px;"></div>
+                <ul id="tree2">
+                    <li isexpand="false">
+                        <ul>
+                            <li><span><a href="javascript:f_addTab('Commands','Admin Commands','/commands/')">Admin Commands</a></span></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
             <div title="Study Menu">
                 <div style=" height:7px;"></div>
                 <a class="l-link" href="http://www.ligerui.com/demo.html" target="_blank">Study Page</a>
             </div>
+
         </div>
 
         <div position="center" id="framecenter">

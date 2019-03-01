@@ -37,7 +37,6 @@ def ERD_9X28_index(request):
     de = DefaultExtractor(['9X28'])
     vcore.splitter('pick_all', extractor = de )
     out = de.ext_snapshot('9X28')
-    pp(type(out))
     return render(request, 'LigerUI/ACIS/ERD_page.htm', {'cookies' : json.dumps(out)})
 
 
@@ -218,7 +217,6 @@ def snapshot_store(request):
     """
     curl --get -d "platform_list=SD55,9x28,9x40" 127.0.0.1:8000/snapshot_store/
     """
-    pp(request.GET)
     platform_list = request.GET['platform_list'].split(',')
 
     for platform in platform_list:
@@ -253,7 +251,7 @@ def special_note(request):
 # ref: "https://pyecharts.github.io/assets/js".
 
 # REMOTE_HOST = "https://pyecharts.github.io/assets/js" << Online temporary usage.
-REMOTE_HOST = "../../LigerUI/ACIS/js"
+REMOTE_HOST = "../../LigerUI/ACIS/static/pyecharts-js"
 
 
 def bug_effectiveness_chart(request):
