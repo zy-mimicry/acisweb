@@ -53,6 +53,7 @@ class TestCases(models.Model):
 
     case_name = models.CharField(max_length=50)
     case_age = models.CharField(max_length=20)
+    delete_status = models.NullBooleanField()
     F_report_path = models.TextField(null=True)
 
     erd = models.ForeignKey("Erds", on_delete=models.CASCADE)

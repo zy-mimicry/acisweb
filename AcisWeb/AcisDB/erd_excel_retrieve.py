@@ -131,7 +131,7 @@ def read_excel(excel_file, platform, version):
                     all_erds.append(erd_values(platform, table, i, version, erd_id_string))
         # in the Bottom line
         elif "BOTTOM_LINE" in table.row_values(i):
-            break;
+            break
         else:
             raise Exception('ERD release excel erd format error! column = %d' % i)
     return all_erds

@@ -63,7 +63,6 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        #'APP_DIRS': False,
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -134,5 +133,4 @@ USE_TZ = True
 
 #STATIC_URL = '/static/'
 STATIC_URL = '/LigerUI/'
-#STATICFILES_DIRS = (os.path.join(os.path.dirname(__file__), '../templates/LigerUI').replace('\\','/'),)
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'templates/LigerUI').replace('\\','/'),)

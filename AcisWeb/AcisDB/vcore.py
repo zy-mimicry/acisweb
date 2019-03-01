@@ -510,52 +510,49 @@ class JiraDataProcesser(CookiesProcesser):
         time.sleep(0.1)
 
         # TestCases Table items save.
-        if 'F_casetree' in  self.cookies and self.cookies['F_casetree']:
-
+        if 'F_casetree' in  self.cookies:
             casetree = self.cookies['F_casetree']
             tcl = e.testcases_set.all()
+            tcl_name_map = {tc.case_name: tc for tc in tcl}
 
-            if not tcl:
-                vlog("> This Erds object [from ERD {}] NOT be related to any case. Attach it. <".format(self.ERD_ID))
-                for ct in casetree:
+            F_casetree_set = {c['case_name'] for c in casetree}
+            delete_items = tcl_name_map.keys() - F_casetree_set
+
+            for di in delete_items:
+                if not tcl_name_map[di].delete_status:
+                    tcl_name_map[di].delete_status = True
+                    tcl_name_map[di].save()
+                    time.sleep(0.1)
+
+            for ct in casetree:
+                # if this test case doesn't in DB, then we should add it into DB now.
+                if ct['case_name'] not in tcl_name_map:
+                    vlog("> new case [{}] bound to Erds Table. <".format(ct['case_name']))
                     e.testcases_set.create(**ct).save()
                     time.sleep(0.1)
-            else:
-                tcl_name_map = {tc.case_name : tc for tc in tcl}
-                F_casetree_set = { c['case_name'] for c in self.cookies['F_casetree']}
-                delete_items = tcl_name_map.keys() - F_casetree_set
+                    continue
 
-                for di in delete_items:
-                    tcl_name_map[di].delete()
-
-                tcl = e.testcases_set.all()
-
-                for ct in casetree:
-                    if ct['case_name'] not in [tc.case_name for tc in tcl]:
-                        vlog("> new case [{}] bound to Erds Table. <".format(ct['case_name']))
-                        e.testcases_set.create(**ct).save()
+                # Should only!
+                tc = e.testcases_set.get(case_name=ct['case_name'])
+                # Test case enable again
+                if tc.delete_status:
+                    tc.delete_status = False
+                    tc.save()
+                    time.sleep(0.1)
+                    vlog("> Enable test case again <")
+                s1 = set(ct['F_report_path'].split(','))
+                vlog("\t S1 : {},\n\t S2 : {}\n\t S1-S2 : {} ".
+                     format(s1,
+                            set(tc.F_report_path.split(',')),
+                            s1 - set(tc.F_report_path.split(','))))
+                if s1 - set(tc.F_report_path.split(',')):
+                    for s in (s1 - set(tc.F_report_path.split(','))):
+                        vlog("> report added: [{}] <".format(s))
+                        tc.F_report_path += ',' + str(s)
+                        tc.save()
                         time.sleep(0.1)
-                    else:
-
-                        s1 = set(ct['F_report_path'].split(','))
-
-                        # Should only!
-                        tc = e.testcases_set.get(case_name = ct['case_name'])
-
-                        vlog("\t S1 : {},\n\t S2 : {}\n\t S1-S2 : {} ".
-                                format(s1,
-                                    set(tc.F_report_path.split(',')),
-                                    s1 - set(tc.F_report_path.split(','))))
-
-                        if tc and s1 - set(tc.F_report_path.split(',')):
-                            for s in (s1 -set(tc.F_report_path.split(','))):
-                                vlog("> report added: [{}] <".format(s))
-                                tc.F_report_path += ',' + str(s)
-                                tc.save()
-                                time.sleep(0.1)
-                        else:
-                            vlog("> case name and report part already exist, do nothing <")
-
+                else:
+                    vlog("> case name and report part already exist, do nothing <")
         else:
             vlog("F_case_tree NOT be provided, do nothing for TESTCASES Table items")
 
@@ -585,7 +582,7 @@ class JiraDataProcesser(CookiesProcesser):
                 # pick TestCases Table items
                 if d == 'F_casetree':
                     #vlog(">> [pick] Deal TestCases Table's type [{}]".format(d))
-                    tcl = e.testcases_set.all()
+                    tcl = e.testcases_set.all().filter(Q(delete_status__isnull=True) | Q(delete_status=False))
                     out[e.version]['F_casetree'] = {}
                     out[e.version]['IR_report']  = {}
 
