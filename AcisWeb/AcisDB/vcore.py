@@ -13,7 +13,7 @@ from pprint import pprint as pp, pformat
 import collections
 from collections import defaultdict
 
-from .models import Erds,TestCases,TestReports,TestCampaign,ProjectSnapshot
+from .models import Erds,TestCases,TestReports,TestCampaign,ProjectSnapshot, SlaveStaticInfo, DutStaticInfo
 
 import logging
 from . import log
@@ -1099,3 +1099,49 @@ class SnapshotDealer(QueryMixin):
         display_count = 5
         latest_five_list = heapq.nlargest(display_count, sl, key = lambda s: s.date)
         return latest_five_list
+
+
+class DeviceStaticInfoManager:
+    registered_devices_map = {
+        'slave_static_info': SlaveStaticInfo,
+        'dut_static_info': DutStaticInfo
+    }
+    def __init__(self, device_model, request_get=None):
+        if device_model not in DeviceStaticInfoManager.registered_devices_map:
+            raise Exception("Can't find you device model")
+        self.device_model = DeviceStaticInfoManager.registered_devices_map[device_model]
+        self.request_get = request_get
+
+    def remove_status_format(self):
+        if self.request_get["remove_status"] == "false" or not self.request_get["remove_status"]:
+            remove_status = False
+        elif self.request_get["remove_status"] == "true":
+            remove_status = True
+        else:
+            raise ValueError("remove status(%s) get from FE error" % self.request_get["remove_status"])
+
+        return  remove_status
+
+    def slave_fields_update(self, slave):
+        for key, value in self.request_get.items():
+            if key == "remove_status":
+                setattr(slave, key, self.remove_status_format())
+            else:
+                setattr(slave, key, value)
+        slave.save()
+
+    def get_available_slaves(self):
+        return list(self.device_model.objects.filter(remove_status=False).values())
+
+    def get_removed_slaves(self):
+        return list(self.device_model.objects.filter(remove_status=True).values())
+
+    def update_info(self):
+        # if "id" passed, we only modify it, if no, that mean we need add one device.
+        if "id" in self.request_get.keys():
+            slave_info = self.device_model.objects.get(id=int(self.request_get["id"]))
+            self.slave_fields_update(slave_info)
+        else:
+            new_slave = self.device_model(**self.request_get)
+            self.slave_fields_update(new_slave)
+

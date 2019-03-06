@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>DUT Info</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=8"/>
+    <link href="../../LigerUI/lib/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css">
+    <link href="../../LigerUI/lib/ligerUI/skins/Gray/css/all.css" rel="stylesheet" type="text/css">
+    <link href="../../LigerUI/lib/ligerUI/skins/ligerui-icons.css" rel="stylesheet" type="text/css">
+    <link href="../../LigerUI/lib/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css" />
+    <link href="../../LigerUI/lib/ligerUI/skins/Gray2014/css/all.css" rel="stylesheet" />
+    <script src="../../LigerUI/lib/jquery/jquery-1.9.0.min.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/jquery-validation/jquery.validate.min.js"></script>
+    <script src="../../LigerUI/lib/jquery-validation/jquery.metadata.js"></script>
+    <script src="../../LigerUI/lib/jquery-validation/messages_cn.js"></script>
+    <script src="../../LigerUI/lib/json2.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/core/base.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerToolBar.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerDialog.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerFilter.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerListBox.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerCheckBox.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerComboBox.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerGrid.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerTextBox.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerDateEditor.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/plugins/ligerSpinner.js" type="text/javascript"></script>
+    <script src="../../LigerUI/demos/filter/ligerGrid.showFilter.js" type="text/javascript"></script>
+    <script src="../../LigerUI/lib/ligerUI/js/ligerui.all.js"></script>
+
+    <script type="text/javascript">
+        var cookies = {{ cookies|safe }};
+        var liger_cookies = {Rows:cookies};
+        $(f_initGrid);
+        var manager, g;
+        function f_initGrid()
+        {
+            g =  manager = $("#maingrid").ligerGrid({
+                columns: [
+                { display: 'id', name: 'id', hide: true },
+                { display: 'FSN', name: 'FSN',
+                    editor: { type: 'text' }
+                },
+                { display: 'slave_mac_addr', name: 'slave_mac_addr',
+                    editor: { type: 'text' }
+                },
+                { display: 'birthday', name: 'birthday',
+                    editor: { type: 'text' },
+                },
+                { display: 'owner', name: 'owner',
+                    editor: { type: 'text' }
+                },
+                { display: 'dead_date', name: 'dead_date',
+                    editor: { type: 'text' }
+                },
+                { display: 'usb_ser', name: 'usb_ser',
+                    editor: { type: 'text' }
+                },
+                { display: 'remove_status', name: 'remove_status',
+                    editor: { type: 'text' }
+                }
+                ],
+                onSelectRow: function (rowdata, rowindex)
+                {
+                    $("#txtrowindex").val(rowindex);
+                },
+                enabledEdit: true, clickToEdit: false, isScroll: false,
+                data:liger_cookies,
+                checkbox: true,
+                width: '100%',
+                toolbar: { items: [
+                     {
+                         text: 'Advance Search',
+                         click: itemclick,
+                         icon: 'search2'
+                     }
+                 ]},
+            });
+
+            $("#pageloading").hide();
+
+            columns_data=[];
+            columns_all='';
+            columns_ids='';
+            $(g.columns).each(function (i, column)
+            {
+                if (column.name)
+                {
+                    columns_data.push(
+                        {
+                            text:column.name,
+                            id:column.name
+                        });
+                    columns_all=columns_all+(columns_all?';':'')+column.name;
+
+                    if (column.hide!=true)
+                    {
+                        columns_ids=columns_ids+(columns_ids?';':'')+column.name;
+                    }
+
+                }
+            });
+            f_open_data={
+                winwidth:540,
+                winheight:420,
+                checkbox:[
+                    {
+                        name:'Column',
+                        text:columns_all,
+                        value:columns_ids,
+                        ctrl:'selcolumn'
+                    },
+                ],
+            };
+            //f_open_init(f_open_data);
+        }
+        function beginEdit() {
+            var row = manager.getSelectedRow();
+            if (!row) { alert('please select a line.'); return; }
+            manager.beginEdit(row);
+        }
+        function cancelEdit() {
+            var row = manager.getSelectedRow();
+            if (!row) { alert('please select a line.'); return; }
+            manager.cancelEdit(row);
+        }
+        function cancelAllEdit()
+        {
+            manager.cancelEdit();
+        }
+        function endEdit()
+        {
+            var row = manager.getSelectedRow();
+            if (!row) { alert('please select a line.'); return; }
+            manager.endEdit(row);
+            if (!row.FSN) { alert('FSN cannot empty!!!!!'); return; }
+            lowcase_remove_status = (row.remove_status).toLowerCase();
+
+            if (lowcase_remove_status && lowcase_remove_status != "false" && lowcase_remove_status != "true")
+            {
+                alert("remove_status should be false or true");
+                return;
+            }
+
+           $.get('/device_static_info_update/', {"id": row.id,
+                           "FSN": row.FSN,
+                          "slave_mac_addr": row.slave_mac_addr,
+                           "birthday": row.birthday,
+                           "usb_ser": row.usb_ser,
+                           "dead_date": row.dead_date,
+                           "remove_status": lowcase_remove_status,
+                          "owner": row.owner});
+
+        }
+        function addNewRow()
+        {
+            manager.addEditRow();
+        }
+
+        function itemclick()
+        {
+             g.options.data = $.extend(true,{}, liger_cookies);
+             g.showFilter();
+        }
+
+        function f_open()
+        {
+            $.ligerDialog.open({
+                height:f_open_data.winheight,//380,
+                width: f_open_data.winwidth,//400,
+                title : 'Please Select the Column',
+                url: '/columns_data_select',
+                showMax: false,
+                showToggle: true,
+                showMin: false,
+                isResize: true,
+                slide: false,
+                onClose :function (item, dialog) { if (this.frame.isdirty) {f_toggleex();}},
+                onLoaded :function (item, dialog) { this.frame.set_dialog(this);},
+                buttons:[
+                    { text:'OK',
+                      onclick:function (item, dialog) {
+                          dialog.frame.f_ok();
+                          //f_toggleex();
+                          //dialog.close();
+                      }},
+                    { text: 'CLOSE', onclick: function (item, dialog) {dialog.close();}},
+                ],
+                data:f_open_data,
+            });
+        }
+
+
+    </script>
+
+<a class="l-button" style="width:80px;float:left; margin-left:6px;" onclick="beginEdit()">Begin Edit</a>
+<a class="l-button" style="width:80px;float:left; margin-left:6px;" onclick="endEdit()">Submit change</a>
+<a class="l-button" style="width:80px;float:left; margin-left:6px;" onclick="cancelEdit()">Cancel Edit</a>
+<a class="l-button" style="width:80px;float:left; margin-left:6px;" onclick="cancelAllEdit()">Cancel All Changes</a>
+<a class="l-button" style="width:100px;float:left; margin-left:6px;" onclick="addNewRow()">Add DUT</a>
+
+
+<div class="l-clear"></div>
+<div id="maingrid" style="margin-top:20px"></div><br>
+<br>
+<div style="display:none;">
+  <!-- g data total ttt -->
+</div>

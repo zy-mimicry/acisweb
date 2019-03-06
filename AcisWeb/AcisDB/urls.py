@@ -52,8 +52,10 @@ urlpatterns = [
     path('special_note/', views.special_note, name = "special_note"),
     path('bug_effectiveness_chart/', views.bug_effectiveness_chart, name = "bug_effectiveness_chart"),
 
-    path('slave_details/', views.slave_details, name = "slave_details"),
-
+    path('device_manage/', views.device_manage, name = "device_manage"),
+    path('device_manage/device_static_info_query/', views.device_static_info_query, name = "device_static_info_query"),
+    path('device_static_info_update/', views.device_static_info_update, name = "device_static_info_update"),
+    path('slave_details/', views.slave_details, name = "slave_details")
     # debug
     path('rex_show_actions/', views_of_rex.rex_show_actions_dispatcher, name = "rex_debug"),
     path('rex_prompt/', views_of_rex.rex_prompt, name = "rex_prompt"),

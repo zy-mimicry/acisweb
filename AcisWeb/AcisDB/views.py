@@ -14,7 +14,8 @@ from itertools import groupby
 from pyecharts import Bar
 from collections import defaultdict,OrderedDict
 import math,random
-
+from AcisDB.models import SlaveStaticInfo,DutStaticInfo
+import jenkins
 from . import log
 from . import vcore
 
@@ -455,8 +456,49 @@ def BSC_format(title, attr, v1, v2):
     return bar
 
 
-from AcisDB.models import SlaveStaticInfo,DutStaticInfo
-import jenkins
+def slave_static_info_query(action):
+    slaves = vcore.DeviceStaticInfoManager("slave_static_info")
+    if action == "all_removed_slaves_manage":
+        slaves_info = slaves.get_removed_slaves()
+    elif action == "all_available_slaves_manage":
+        slaves_info = slaves.get_available_slaves()
+    return slaves_info
+
+
+def dut_static_info_query(action):
+    duts = vcore.DeviceStaticInfoManager("dut_static_info")
+    if action == "all_removed_duts_manage":
+        duts_info = duts.get_removed_slaves()
+    elif action == "all_available_duts_manage":
+        duts_info = duts.get_available_slaves()
+    return duts_info
+
+
+def device_static_info_query(request):
+    action = request.GET.get("action")
+    if action == "all_removed_slaves_manage" or action == "all_available_slaves_manage":
+        slaves_info = slave_static_info_query(action)
+        return render(request, 'LigerUI/ACIS/slave_static_info.htm', {'cookies': json.dumps(slaves_info)})
+    elif action == "all_removed_duts_manage" or action == "all_available_duts_manage":
+        duts_info = dut_static_info_query(action)
+        return render(request, 'LigerUI/ACIS/dut_static_info.htm', {'cookies': json.dumps(duts_info)})
+    else:
+        raise Exception("Cannot Support This Query")
+
+
+def device_static_info_update(request):
+    # For slave, the "mac_addr" must be passed, so this field to distinguish slave or dut.
+    if "mac_addr" in request.GET.keys():
+        slave = vcore.DeviceStaticInfoManager("slave_static_info", request.GET)
+        slave.update_info()
+    else:
+        slave = vcore.DeviceStaticInfoManager("dut_static_info", request.GET)
+        slave.update_info()
+    return HttpResponse('#')
+
+def device_manage(request):
+    return render(request, 'LigerUI/ACIS/device_manage.htm')
+
 
 def get_all_valid_nodes():
     """
@@ -546,3 +588,4 @@ def slave_details(request):
                         dynamic_info['DUTs'][dut_name]['dut_info_' + g_of_dut.group(5)] = g_of_dut.group(6)
 
     return render(request, 'LigerUI/ACIS/slave_details.htm', {'info' : info})
+
