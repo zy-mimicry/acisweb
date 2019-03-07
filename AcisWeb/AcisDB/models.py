@@ -141,3 +141,22 @@ class DutStaticInfo(models.Model):
     def __str__(self):
         display = "< {}_{}_{}_{} >".format(self.FSN, self.usb_ser, self.slave_mac_addr, self.owner)
         return display
+
+class TestHistory(models.Model):
+    """
+    ACIS Slave-Node Test History.
+    """
+    test_date_on_pi = models.CharField(max_length=20)
+    hostname = models.CharField(max_length=20)
+    slave_mac_addr = models.CharField(max_length=20)
+    FSN = models.CharField(max_length=20)
+    case_name = models.CharField(max_length=20)
+    test_result = models.CharField(max_length=20)
+
+    # mapto TestCampaign item
+    test_campaign = models.OneToOneField(TestCampaign, unique=True, on_delete=True)
+
+    def __str__(self):
+        display = "< {}: {}/{}/{} >"\
+                  "".format(self.test_date_on_pi, self.FSN, self.case_name, self.test_result)
+        return display

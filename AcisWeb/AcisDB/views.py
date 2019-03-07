@@ -61,14 +61,6 @@ def columns_data_select(request):
     return render(request, 'LigerUI/ACIS/columns_data_select.htm')
 
 
-def help(request):
-    return render(request, 'LigerUI/ACIS/help.htm', {})
-
-
-def about(request):
-    return render(request, 'LigerUI/ACIS/about.htm', {})
-
-
 def query(request):
     return render(request, 'LigerUI/ACIS/query.htm', {})
 

@@ -32,8 +32,6 @@ urlpatterns = [
     path('actions/', views.actions_dispatcher, name = "actions"),
 
     path('commands/', views.commands, name = "commands"),
-    path('help/', views.help, name = "help"),
-    path('about/', views.about, name = "about"),
 
     path('query/', views.query, name = "query"),
     path('query/switch/', views.query_switch, name = "switch"),
@@ -55,7 +53,8 @@ urlpatterns = [
     path('device_manage/', views.device_manage, name = "device_manage"),
     path('device_manage/device_static_info_query/', views.device_static_info_query, name = "device_static_info_query"),
     path('device_static_info_update/', views.device_static_info_update, name = "device_static_info_update"),
-    path('slave_details/', views.slave_details, name = "slave_details")
+    path('slave_details/', views.slave_details, name = "slave_details"),
+
     # debug
     path('rex_show_actions/', views_of_rex.rex_show_actions_dispatcher, name = "rex_debug"),
     path('rex_prompt/', views_of_rex.rex_prompt, name = "rex_prompt"),
