@@ -1,6 +1,8 @@
 from django.contrib import admin
-from .models import (Erds,TestCases,TestReports,TestCampaign,
-                     ProjectSnapshot,SlaveStaticInfo,DutStaticInfo)
+from .models import (Erds,TestCases,TestReports,
+                     TestCampaign,ProjectSnapshot,
+                     SlaveStaticInfo,DutStaticInfo,
+                     TestHistory)
 
 from reversion.admin import VersionAdmin
 
@@ -59,3 +61,11 @@ class DutStaticInfoModelAdmin(VersionAdmin):
     list_filter = ('remove_status', 'owner')
     search_fields = ['FSN', 'usb_ser', 'birthday', 'dead_date','slave_mac_addr']
     ordering = ['birthday']
+
+@admin.register(TestHistory)
+class TestHistoryModelAdmin(VersionAdmin):
+    list_display = ('test_date_on_pi', 'hostname', 'FSN', 'case_name', 'test_result','slave_mac_addr')
+    list_filter = ('hostname', 'FSN', 'case_name')
+    search_fields = ['FSN', 'test_date_on_pi', 'test_result', 'slave_mac_addr']
+    ordering = ['-test_date_on_pi']
+

@@ -139,18 +139,27 @@ class AutoJenkinsProvider(vcore.Provider):
             'fw_version'     : 2,
         }
 
+        # improvement here !!! whether hard-code??
         platform_maps = {
             '9X28' : ('AR7588',),
             '9X40' : ('AR7598',),
         }
 
         re_SWI_ACIS = re.compile(r'TESTCASE:\[(.*?)\]\s*Result:\[(.*?)\]\s*Test_Date:\[(.*?)\]\s*Description:\[(.*?)\]\s*Test_Times:\[(.*?)\]\s*Test_Log:\[(.*?)\]\s*Test_IR_Report:\[(.*?)\]\s*')
-        re_AT_ATI   = re.compile(r'\[Model: (.*)<CR><LF>Revision: (.*?)\s')
+        re_AT_ATI   = re.compile(r'.*?\[Model: (.*)<CR><LF>Revision: (.*?)\s')
+        re_AT_FSN_ATI = re.compile(r'.*?\[FSN:\s+?(.*?)<CR><LF>\s*')
+
+        re_hostname = re.compile(r".*?<slave info>\s*?\[hostname\s*?\].*\[(.*?)\]$")
+        re_mac_addr = re.compile(r".*?<slave info>\s*?\[mac_eth0\s*?\].*\[(.*?)\]$")
+        re_pi_date = re.compile(r".*?<slave info>\s*?\[pi_time\s*?\].*\[(.*?)\]$")
 
         for f in files:
             record[f] = {}
+            # Maybe mulite-DUTs exist, so create a set for FSN
+            fsn_set = set()
             last_one_touch = False
-            once_flag      = False
+            once_flag = False
+            slave_info_flag = 3 # there are three info should be picked.
 
             pass_times = 0
             fail_times = 0
@@ -176,19 +185,40 @@ class AutoJenkinsProvider(vcore.Provider):
                         last_one_touch = True
 
                 rs = re_AT_ATI.search(line)
-
                 if rs and not once_flag:
                     for platform, products in platform_maps.items():
                         if rs.group(re_g['product']) in products:
                             record[f]['Platform'] = platform
 
                     record[f]['FW_version'] = rs.group(re_g['fw_version'])
-
                     once_flag = True
+
+                rs_fsn = re_AT_FSN_ATI.match(line)
+                if rs_fsn:
+                    fsn_set.add(rs_fsn.group(1))
+
+                if slave_info_flag != 0:
+                    rs_hostname = re_hostname.match(line)
+                    if rs_hostname:
+                        record[f]['hostname'] = rs_hostname.group(1)
+                        slave_info_flag -= 1
+
+                    rs_mac_addr = re_mac_addr.match(line)
+                    if rs_mac_addr:
+                        record[f]['mac_addr'] = rs_mac_addr.group(1)
+                        slave_info_flag -= 1
+
+                    rs_pi_date  = re_pi_date.match(line)
+                    if rs_pi_date:
+                        record[f]['pi_date'] = rs_pi_date.group(1)
+                        slave_info_flag -= 1
 
             record[f]['PASS_TIMES'] = pass_times
             record[f]['FAIL_TIMES'] = fail_times
+            record[f]['FSN'] = fsn_set
 
+        print("jenkins test record:")
+        pp(record)
         return record
 
     def translate_element(self, files, record):
@@ -207,9 +237,17 @@ class AutoJenkinsProvider(vcore.Provider):
                 'test_log'     : record[f]['Test_Log'],
                 'test_date'    : record[f]['Test_Date'],
                 'IR_report_path' : record[f]['IR_Report_Path'],
-            }
+
+                'hostname' : record[f]['hostname'],
+                'mac_addr' : record[f]['mac_addr'],
+                'pi_date' : record[f]['pi_date'],
+                'FSN' : record[f]['FSN'],
+             }
 
         out.append(once_dict)
+
+        print("record out formatted")
+        pp(out)
         return out
 
     def get_data(self):

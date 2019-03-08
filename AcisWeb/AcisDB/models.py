@@ -154,9 +154,9 @@ class TestHistory(models.Model):
     test_result = models.CharField(max_length=20)
 
     # mapto TestCampaign item
-    test_campaign = models.OneToOneField(TestCampaign, unique=True, on_delete=True)
+    test_campaign = models.OneToOneField(TestCampaign, unique=True, on_delete=models.CASCADE)
 
     def __str__(self):
         display = "< {}: {}/{}/{} >"\
-                  "".format(self.test_date_on_pi, self.FSN, self.case_name, self.test_result)
+                  "".format(self.test_date_on_pi, self.FSN, self.hostname, self.slave_mac_addr)
         return display

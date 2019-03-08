@@ -3,23 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <title>Device Manage</title>
+	  <meta http-equiv="X-UA-Compatible" content="IE=8"/>
+    <link href="../../LigerUI/ACIS/static/css/bootstrap.css" rel="stylesheet" type="text/css">
 
 </head>
-<body>
 <body style="padding:10px">
-    <!-- <form action="switch" id="topForm" target="_self"> -->
-    <form action="device_static_info_query" id="topForm" target="_self">
-        <select name="action">
-            <option value="" >Please select your action</option>
-            <option value="all_removed_slaves_manage">All Removed Slaves Manage</option>
-            <option value="all_available_slaves_manage">All Available Slaves Manage</option>
-            <option value="all_removed_duts_manage" >ALL Removed DUTs Manage</option>
-            <option value="all_available_duts_manage" >ALL Available DUTs Manage</option>
-        </select>
-        <br />
-        <br />
-        <input type="submit" value="submit" />
-    </form>
-</body>
+    <div class="container-fluid pt-4">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">All Available Slaves Manage</h5>
+                        <p class="card-text">Manage all slave nodes that could be available.<br>BTW, you can register your slave node in this place.</p>
+                        <a href="device_static_info_query/?action=all_available_slaves_manage" class="btn btn-primary">Goto Management</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">All Removed Slaves Manage</h5>
+                        <p class="card-text">Manage all slave nodes that had been removed.<br>BTW, you can register your slave node in this place.</p>
+                        <a href="device_static_info_query/?action=all_removed_slaves_manage" class="btn btn-primary">Goto Management</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">ALL Available DUTs Manage</h5>
+                        <p class="card-text">Manage all DUT nodes that could be available. <br>BTW, you can register your DUT node in this place.</p>
+                        <a href="device_static_info_query/?action=all_available_duts_manage" class="btn btn-primary">Goto Management</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">ALL Removed DUTs Manage</h5>
+                        <p class="card-text">Manage all DUT nodes that had been removed. <br>BTW, you can register your DUT node in this place.</p>
+                        <a href="device_static_info_query/?action=all_removed_duts_manage" class="btn btn-primary">Goto Management</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../LigerUI/ACIS/static/js/jquery-3.3.1.js" type="text/javascript"></script>
+    <script src="../../LigerUI/ACIS/static/js/popper.js" type="text/javascript"></script>
+    <script src="../../LigerUI/ACIS/static/js/bootstrap.js" type="text/javascript"></script>
+
 </body>
 </html>

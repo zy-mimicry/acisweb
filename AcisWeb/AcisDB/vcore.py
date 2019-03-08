@@ -13,7 +13,10 @@ from pprint import pprint as pp, pformat
 import collections
 from collections import defaultdict
 
-from .models import Erds,TestCases,TestReports,TestCampaign,ProjectSnapshot, SlaveStaticInfo, DutStaticInfo
+from .models import (Erds,TestCases,TestReports,
+                     TestCampaign,ProjectSnapshot,
+                     SlaveStaticInfo, DutStaticInfo,
+                     TestHistory)
 
 import logging
 from . import log
@@ -240,14 +243,16 @@ def splitter(action, provider = None, extractor = None):
                         types[tp](PLATFORM, ERD_ID, cookies = cookie[tp], description = description).doit(action)
                 except Exception as e:
                     vlog("> &_& Save action of [{tp}] occurs exception, reason: [{reason}]".format(tp=tp, reason=e.args))
-                    #raise
+                    raise
                 else:
                     if tp in types and tp not in tp_record:
                         tb_log('Data from [{type_of_data}] to the DB [{db}]'.format(type_of_data=tp, db = db_name))
                         tp_record.append(tp)
-                    # Jenkins data just once (save).
+                    # Jenkins test campaign just once (save).
                     if tp in types and tp == "jenkins" and cookie[tp]:
-                        TestCampaignDealer().save(cookie)
+                        tcd = TestCampaignDealer()
+                        tcd.save(cookie)
+                        TestHistoryDealer().save(cookie[tp], tcd.get_latest(display_count=1)[0])
                 finally:
                     mutex.release()
 
@@ -731,7 +736,15 @@ class JenkinsDataProcesser(CookiesProcesser):
             for tc in tcl:
                 if tc.case_name in self.cookies['IR_casetree']:
                     self.cookies['IR_casetree'][tc.case_name].update({'description' : self.description})
-                    tc.testreports_set.create(**self.cookies['IR_casetree'][tc.case_name]).save()
+
+                    result = self.cookies['IR_casetree'][tc.case_name]
+                    to_save = {}
+                    for res in result:
+                        if res in TestReports.__dict__:
+                            to_save[res] = result[res]
+
+                    # tc.testreports_set.create(**self.cookies['IR_casetree'][tc.case_name]).save()
+                    tc.testreports_set.create(**to_save).save()
                     time.sleep(0.1)
                     ANY_MATCHED = True
 
@@ -995,7 +1008,7 @@ class TestReportQuery(Query):
 
 class QueryMixin:
 
-    def query(self, ** query_keys):
+    def query(self, **query_keys):
         """
         This may not be a good implementation, but at least avoid duplicate code.
         """
@@ -1046,9 +1059,6 @@ class TestCampaignDealer(QueryMixin):
 
     def save(self, cookie):
 
-        if not cookie:
-            raise Exception("> &_& cookie is empty dict.")
-
         to_save = {}
         _, any = random.choice(list(cookie['jenkins']['IR_casetree'].items()))
 
@@ -1059,16 +1069,18 @@ class TestCampaignDealer(QueryMixin):
 
         TestCampaign(**to_save).save()
 
-        tb_log('Data from [{type_of_data}] to the table ({tb}) of  DB [{db}]'.format(type_of_data='Jenkins Test',
-                                                                                     tb='TestCampaign',
-                                                                                     db = 'ACIS_DB'))
+        tb_log('Data from [{type_of_data}] to the table ({tb}) of  DB [{db}]'
+               .format(type_of_data='Jenkins Test', tb='TestCampaign', db = 'ACIS_DB'))
 
-    def get_latest(self):
+    def get_latest(self, display_count = 5):
 
         cl = TestCampaign.objects.all()
-        display_count = 5
         latest_five_list = heapq.nlargest(display_count, cl, key = lambda c : c.test_date)
         return latest_five_list
+
+    def query_by_id(self, id):
+        return TestCampaign.objects.get(id = id)
+
 
 class SnapshotDealer(QueryMixin):
 
@@ -1084,9 +1096,8 @@ class SnapshotDealer(QueryMixin):
         s.snap = pickle.dumps(any_obj)
         s.save()
 
-        tb_log('Data from [{type_of_data}] to the table ({tb}) of  DB [{db}]'.format(type_of_data='project view',
-                                                                                     tb='ProjectSnapshot',
-                                                                                     db = 'ACIS_DB'))
+        tb_log('Data from [{type_of_data}] to the table ({tb}) of  DB [{db}]'.
+               format(type_of_data='project view', tb='ProjectSnapshot', db = 'ACIS_DB'))
 
     def unpickling(self, date, tag = "AutoSaveWeekly"):
         sl = ProjectSnapshot.objects.filter(date=date, tag=tag)
@@ -1094,9 +1105,8 @@ class SnapshotDealer(QueryMixin):
         out = pickle.loads(sl[only].snap)
         return out
 
-    def get_latest(self):
+    def get_latest(self, display_count = 5):
         sl = ProjectSnapshot.objects.all()
-        display_count = 5
         latest_five_list = heapq.nlargest(display_count, sl, key = lambda s: s.date)
         return latest_five_list
 
@@ -1145,3 +1155,30 @@ class DeviceStaticInfoManager:
             new_slave = self.device_model(**self.request_get)
             self.slave_fields_update(new_slave)
 
+class TestHistoryDealer:
+
+    def save(self, cookies, test_campaign):
+        cases_result_info = cookies['IR_casetree']
+
+        for case_name, test_info in cases_result_info.items():
+            to_save = {}
+            to_save['test_date_on_pi'] = test_info['pi_date']
+            to_save['hostname'] = test_info['hostname']
+            to_save['slave_mac_addr'] = test_info['mac_addr']
+            to_save['FSN'] = ','.join(test_info['FSN'])
+            to_save['case_name'] = case_name
+            to_save['test_result'] = test_info['test_result']
+            to_save['test_campaign'] = test_campaign
+            TestHistory(**to_save).save()
+
+    def query(self, **kwargs):
+
+        wanted_kwargs = {kwarg: kwargs[kwarg] for kwarg in kwargs if kwarg in TestHistory.__dict__}
+
+        if not any(wanted_kwargs.values()):
+            thl = TestHistory.objects.all().order_by('-test_date_on_pi').values()
+        else:
+            not_empty_fuzzy = {wkwarg+"__icontains": value for wkwarg,value in wanted_kwargs.items() if value }
+            thl = TestHistory.objects.filter(**not_empty_fuzzy).order_by('-test_date_on_pi').values()
+
+        return thl

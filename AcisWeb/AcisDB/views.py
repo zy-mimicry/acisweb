@@ -68,6 +68,14 @@ def query(request):
 def query_switch(request):
     if request.method == "GET":
         # if platform not pass, throw exception.
+        if 'hostname' in request.GET:
+            hostname = request.GET['hostname']
+            mac_addr = request.GET['mac_addr']
+            dut_fsn = request.GET['FSN']
+
+            thl = vcore.TestHistoryDealer().query(hostname=hostname, slave_mac_addr=mac_addr, FSN=dut_fsn)
+            return render(request, 'LigerUI/ACIS/test_history.htm', {'test_history_list' : thl})
+
         platform = request.GET.get('platform').upper()
 
         if not ({'platform', 'FirmwareVersion','start_test_date', 'end_test_date'} - set(request.GET.keys())):
@@ -127,9 +135,9 @@ def actions_dispatcher(request):
         parameters = request.POST
 
     if parameters:
-        if parameters['command'] == 'save_erd_data':
+        if 'erd_excel_file' in parameters:
             do_save_excel(parameters['platform'], parameters['ErdVersion'], parameters['erd_excel_file'])
-        elif parameters['command'] == 'save_jira_data':
+        elif 'jira_address' in parameters:
             do_save_jira(parameters['platform'],
                          parameters['jira_address'],
                          parameters['jira_user'],
@@ -168,14 +176,13 @@ def campaign_index(request):
 
 def campaign_query(request):
 
-    not_empty_args = {}
-
     # filter out emtpy args.
-    for arg, value in request.GET.items():
-        if value.strip():
-            not_empty_args[arg] = value
+    not_empty_args = { arg: value for arg, value in request.GET.items() if value.strip()}
 
-    query_result_list = vcore.TestCampaignDealer().query(**not_empty_args)
+    if 'id' in not_empty_args:
+        query_result_list = [vcore.TestCampaignDealer().query_by_id(**not_empty_args)]
+    else:
+        query_result_list = vcore.TestCampaignDealer().query(**not_empty_args)
 
     return render(request, 'LigerUI/ACIS/latest_campaign.htm', {'latest_list' : query_result_list})
 

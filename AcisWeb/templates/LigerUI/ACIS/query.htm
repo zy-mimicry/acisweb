@@ -30,6 +30,10 @@
                             Test Report by Case Name
                         </a>
 
+                        <a class="nav-link" id="v-pills-test-history-tab" data-toggle="pill" href="#v-pills-test-history" role="tab" aria-controls="v-pills-test-history" aria-selected="false">
+                            Test History List
+                        </a>
+
                     </div>
                 </div>
 
@@ -147,6 +151,34 @@
                                 </div>
                             </div>
                         </div>
+
+
+                        <div class="tab-pane fade" id="v-pills-test-history" role="tabpanel" aria-labelledby="v-pills-test-history-tab">
+
+                            <div class="container-fluid">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <!-- <form action="switch" target="_blank"> -->
+                                        <form action="switch" target="_self">
+                                            <div class="form-group">
+                                                <label for="hostname">Slave ID (hostname)</label>
+                                                <input id="hostname" name="hostname" class="form-control" type="text" placeholder= "Input Slave ID (hostname): eg. F-RZHENG">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="mac_addr">Slave ID (mac eth0 address)</label>
+                                                <input id="mac_addr" name="mac_addr" class="form-control" type="text" placeholder= "Input Slave ID (mac addr): eg. b8:27:eb:38:af:b5">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="dut_fsn">DUT ID(FSN)</label>
+                                                <input id="dut_fsn" name="FSN" class="form-control" type="text" placeholder= "Input DUT FSN: eg. Q2635400140603">
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
 
                     </div>
                 </div>
