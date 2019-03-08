@@ -217,8 +217,6 @@ class AutoJenkinsProvider(vcore.Provider):
             record[f]['FAIL_TIMES'] = fail_times
             record[f]['FSN'] = fsn_set
 
-        print("jenkins test record:")
-        pp(record)
         return record
 
     def translate_element(self, files, record):
@@ -245,9 +243,6 @@ class AutoJenkinsProvider(vcore.Provider):
              }
 
         out.append(once_dict)
-
-        print("record out formatted")
-        pp(out)
         return out
 
     def get_data(self):
