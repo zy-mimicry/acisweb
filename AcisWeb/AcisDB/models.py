@@ -110,9 +110,9 @@ class ProjectSnapshot(models.Model):
         display = "< {}_{}_{} >".format(self.platform, self.date, self.tag)
         return display
 
-class SlaveStaticInfo(models.Model):
+class SubordinateStaticInfo(models.Model):
     """
-    ACIS Slave node static information that be added manually.
+    ACIS Subordinate node static information that be added manually.
     """
     img_version = models.CharField(max_length=20)
     birthday = models.CharField(max_length=20)
@@ -135,20 +135,20 @@ class DutStaticInfo(models.Model):
     FSN = models.CharField(max_length=20)
     remove_status = models.BooleanField()
     dead_date = models.CharField(max_length=25, null=True, blank=True)
-    slave_mac_addr = models.CharField(max_length=30)
+    subordinate_mac_addr = models.CharField(max_length=30)
     owner = models.CharField(max_length=30)
 
     def __str__(self):
-        display = "< {}_{}_{}_{} >".format(self.FSN, self.usb_ser, self.slave_mac_addr, self.owner)
+        display = "< {}_{}_{}_{} >".format(self.FSN, self.usb_ser, self.subordinate_mac_addr, self.owner)
         return display
 
 class TestHistory(models.Model):
     """
-    ACIS Slave-Node Test History.
+    ACIS Subordinate-Node Test History.
     """
     test_date_on_pi = models.CharField(max_length=20)
     hostname = models.CharField(max_length=20)
-    slave_mac_addr = models.CharField(max_length=20)
+    subordinate_mac_addr = models.CharField(max_length=20)
     FSN = models.CharField(max_length=100)
     case_name = models.CharField(max_length=20)
     test_result = models.CharField(max_length=20)
@@ -158,5 +158,5 @@ class TestHistory(models.Model):
 
     def __str__(self):
         display = "< {}: {}/{}/{} >"\
-                  "".format(self.test_date_on_pi, self.FSN, self.hostname, self.slave_mac_addr)
+                  "".format(self.test_date_on_pi, self.FSN, self.hostname, self.subordinate_mac_addr)
         return display
