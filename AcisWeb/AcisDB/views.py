@@ -14,7 +14,7 @@ from itertools import groupby
 from pyecharts import Bar
 from collections import defaultdict,OrderedDict
 import math,random
-from AcisDB.models import SlaveStaticInfo,DutStaticInfo
+from AcisDB.models import SubordinateStaticInfo,DutStaticInfo
 import jenkins
 from . import log
 from . import vcore
@@ -73,7 +73,7 @@ def query_switch(request):
             mac_addr = request.GET['mac_addr']
             dut_fsn = request.GET['FSN']
 
-            thl = vcore.TestHistoryDealer().query(hostname=hostname, slave_mac_addr=mac_addr, FSN=dut_fsn)
+            thl = vcore.TestHistoryDealer().query(hostname=hostname, subordinate_mac_addr=mac_addr, FSN=dut_fsn)
             return render(request, 'LigerUI/ACIS/test_history.htm', {'test_history_list' : thl})
 
         platform = request.GET.get('platform').upper()
@@ -455,29 +455,29 @@ def BSC_format(title, attr, v1, v2):
     return bar
 
 
-def slave_static_info_query(action):
-    slaves = vcore.DeviceStaticInfoManager("slave_static_info")
-    if action == "all_removed_slaves_manage":
-        slaves_info = slaves.get_removed_slaves()
-    elif action == "all_available_slaves_manage":
-        slaves_info = slaves.get_available_slaves()
-    return slaves_info
+def subordinate_static_info_query(action):
+    subordinates = vcore.DeviceStaticInfoManager("subordinate_static_info")
+    if action == "all_removed_subordinates_manage":
+        subordinates_info = subordinates.get_removed_subordinates()
+    elif action == "all_available_subordinates_manage":
+        subordinates_info = subordinates.get_available_subordinates()
+    return subordinates_info
 
 
 def dut_static_info_query(action):
     duts = vcore.DeviceStaticInfoManager("dut_static_info")
     if action == "all_removed_duts_manage":
-        duts_info = duts.get_removed_slaves()
+        duts_info = duts.get_removed_subordinates()
     elif action == "all_available_duts_manage":
-        duts_info = duts.get_available_slaves()
+        duts_info = duts.get_available_subordinates()
     return duts_info
 
 
 def device_static_info_query(request):
     action = request.GET.get("action")
-    if action == "all_removed_slaves_manage" or action == "all_available_slaves_manage":
-        slaves_info = slave_static_info_query(action)
-        return render(request, 'LigerUI/ACIS/slave_static_info.htm', {'cookies': json.dumps(slaves_info)})
+    if action == "all_removed_subordinates_manage" or action == "all_available_subordinates_manage":
+        subordinates_info = subordinate_static_info_query(action)
+        return render(request, 'LigerUI/ACIS/subordinate_static_info.htm', {'cookies': json.dumps(subordinates_info)})
     elif action == "all_removed_duts_manage" or action == "all_available_duts_manage":
         duts_info = dut_static_info_query(action)
         return render(request, 'LigerUI/ACIS/dut_static_info.htm', {'cookies': json.dumps(duts_info)})
@@ -486,13 +486,13 @@ def device_static_info_query(request):
 
 
 def device_static_info_update(request):
-    # For slave, the "mac_addr" must be passed, so this field to distinguish slave or dut.
+    # For subordinate, the "mac_addr" must be passed, so this field to distinguish subordinate or dut.
     if "mac_addr" in request.GET.keys():
-        slave = vcore.DeviceStaticInfoManager("slave_static_info", request.GET)
-        slave.update_info()
+        subordinate = vcore.DeviceStaticInfoManager("subordinate_static_info", request.GET)
+        subordinate.update_info()
     else:
-        slave = vcore.DeviceStaticInfoManager("dut_static_info", request.GET)
-        slave.update_info()
+        subordinate = vcore.DeviceStaticInfoManager("dut_static_info", request.GET)
+        subordinate.update_info()
     return HttpResponse('#')
 
 def device_manage(request):
@@ -512,36 +512,36 @@ def get_all_valid_nodes():
          c.1) Jenkins status offline ( show offline )
          c.2) Jenkins status online  ( show dynamic info )
     """
-    ssil = SlaveStaticInfo.objects.all().filter(remove_status = False)
+    ssil = SubordinateStaticInfo.objects.all().filter(remove_status = False)
     nodes_from_model = [ ssi.hostname for ssi in ssil ]
 
     server = jenkins.Jenkins('http://cnshz-ed-svr098:8080', username='acis', password='acis')
-    slave_pi_nodes = server.get_nodes()
-    nodes_from_jenkins = [ node['name'] for node in slave_pi_nodes ]
+    subordinate_pi_nodes = server.get_nodes()
+    nodes_from_jenkins = [ node['name'] for node in subordinate_pi_nodes ]
     nodes_intersection = set(nodes_from_model) & set(nodes_from_jenkins)
 
     nodes_with_status = []
-    for index,slave_pi in enumerate(slave_pi_nodes):
-        if slave_pi['name'] in nodes_intersection:
-            nodes_with_status.append(slave_pi)
+    for index,subordinate_pi in enumerate(subordinate_pi_nodes):
+        if subordinate_pi['name'] in nodes_intersection:
+            nodes_with_status.append(subordinate_pi)
 
     return nodes_with_status
 
 
-def slave_details(request):
+def subordinate_details(request):
 
     nodes = get_all_valid_nodes()
     info = {}
 
-    slave_info_re = re.compile(r'\s*<slave info>\s*\[\s*(.*?)\s*\]\s*:\s*\[\s*(.*?)\s*\]\s*\[\s*(.*?)\s*\]')
+    subordinate_info_re = re.compile(r'\s*<subordinate info>\s*\[\s*(.*?)\s*\]\s*:\s*\[\s*(.*?)\s*\]\s*\[\s*(.*?)\s*\]')
     dut_info_re = re.compile(r'\s*<dut info>\s*\[\s*(.*?)\s*:\s*(.*?)\]\s*\[\s*(.*?)\s*:\s*(.*?)\s*\]\s*\[\s*(.*?)\s*:\s*(.*?)\s*\]')
-    info_dir = '/home/rex/temp/Slave-Info/'
+    info_dir = '/home/rex/temp/Subordinate-Info/'
 
     for node in nodes:
         info[node['name']] = {}
         static_info = info[node['name']]['static'] = {}
 
-        ssi = SlaveStaticInfo.objects.get(hostname = node['name'])
+        ssi = SubordinateStaticInfo.objects.get(hostname = node['name'])
         static_info['offline'] = node['offline']
         for name,value in ssi.__dict__.items():
             # Filter out the properties that are integrated by the parent class(model.Model).
@@ -550,7 +550,7 @@ def slave_details(request):
 
         static_info['DUTs'] = {}
         dsil = DutStaticInfo.objects.all().\
-               filter(slave_mac_addr = ssi.mac_addr, remove_status = False)
+               filter(subordinate_mac_addr = ssi.mac_addr, remove_status = False)
 
         for dsi in dsil:
             _si = static_info['DUTs'][dsi.FSN] = {}
@@ -559,8 +559,8 @@ def slave_details(request):
                     _si[name] = value
 
         dynamic_info = info[node['name']]['dynamic'] = {}
-        #info_dir = '/home/rex/nfs_acis/Slave-Info/'
-        info_dir = '/home/rex/temp/Slave-Info/'
+        #info_dir = '/home/rex/nfs_acis/Subordinate-Info/'
+        info_dir = '/home/rex/temp/Subordinate-Info/'
         latest = max(os.listdir(info_dir))
         node_file_names = os.listdir(info_dir + latest)
 
@@ -569,13 +569,13 @@ def slave_details(request):
         else:
             dynamic_info['DUTs'] = {}
 
-            info_file = info_dir + latest + '/' + node['name'] +'/slave_info.log'
+            info_file = info_dir + latest + '/' + node['name'] +'/subordinate_info.log'
             with open(info_file, 'r') as f:
                 for line in f:
-                    g_of_slave = slave_info_re.match(line)
-                    if g_of_slave:
-                        # example: <slave info> [slave_root_space_total   ]: [status:0   ] [30G]
-                        dynamic_info['slave_info_' + g_of_slave.group(1)] = g_of_slave.group(3)
+                    g_of_subordinate = subordinate_info_re.match(line)
+                    if g_of_subordinate:
+                        # example: <subordinate info> [subordinate_root_space_total   ]: [status:0   ] [30G]
+                        dynamic_info['subordinate_info_' + g_of_subordinate.group(1)] = g_of_subordinate.group(3)
 
                     g_of_dut = dut_info_re.match(line)
                     if g_of_dut:
@@ -586,5 +586,5 @@ def slave_details(request):
                         dynamic_info['DUTs'][dut_name]['dut_info_' + g_of_dut.group(3)] = g_of_dut.group(4)
                         dynamic_info['DUTs'][dut_name]['dut_info_' + g_of_dut.group(5)] = g_of_dut.group(6)
 
-    return render(request, 'LigerUI/ACIS/slave_details.htm', {'info' : info})
+    return render(request, 'LigerUI/ACIS/subordinate_details.htm', {'info' : info})
 

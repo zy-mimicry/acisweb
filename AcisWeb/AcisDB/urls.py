@@ -53,7 +53,7 @@ urlpatterns = [
     path('device_manage/', views.device_manage, name = "device_manage"),
     path('device_manage/device_static_info_query/', views.device_static_info_query, name = "device_static_info_query"),
     path('device_static_info_update/', views.device_static_info_update, name = "device_static_info_update"),
-    path('slave_details/', views.slave_details, name = "slave_details"),
+    path('subordinate_details/', views.subordinate_details, name = "subordinate_details"),
 
     # debug
     path('rex_show_actions/', views_of_rex.rex_show_actions_dispatcher, name = "rex_debug"),

@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('test_date_on_pi', models.CharField(max_length=20)),
                 ('hostname', models.CharField(max_length=20)),
-                ('slave_mac_addr', models.CharField(max_length=20)),
+                ('subordinate_mac_addr', models.CharField(max_length=20)),
                 ('FSN', models.CharField(max_length=100)),
                 ('case_name', models.CharField(max_length=20)),
                 ('test_result', models.CharField(max_length=20)),

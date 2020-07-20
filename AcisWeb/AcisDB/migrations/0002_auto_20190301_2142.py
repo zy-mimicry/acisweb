@@ -19,12 +19,12 @@ class Migration(migrations.Migration):
                 ('FSN', models.CharField(max_length=20)),
                 ('remove_status', models.BooleanField()),
                 ('dead_date', models.CharField(blank=True, max_length=25, null=True)),
-                ('slave_mac_addr', models.CharField(max_length=30)),
+                ('subordinate_mac_addr', models.CharField(max_length=30)),
                 ('owner', models.CharField(max_length=30)),
             ],
         ),
         migrations.CreateModel(
-            name='SlaveStaticInfo',
+            name='SubordinateStaticInfo',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('img_version', models.CharField(max_length=20)),
