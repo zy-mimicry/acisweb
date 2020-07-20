@@ -149,9 +149,9 @@ class AutoJenkinsProvider(vcore.Provider):
         re_AT_ATI   = re.compile(r'.*?\[Model: (.*)<CR><LF>Revision: (.*?)\s')
         re_AT_FSN_ATI = re.compile(r'.*?\[FSN:\s+?(.*?)<CR><LF>\s*')
 
-        re_hostname = re.compile(r".*?<slave info>\s*?\[hostname\s*?\].*\[(.*?)\]$")
-        re_mac_addr = re.compile(r".*?<slave info>\s*?\[mac_eth0\s*?\].*\[(.*?)\]$")
-        re_pi_date = re.compile(r".*?<slave info>\s*?\[pi_time\s*?\].*\[(.*?)\]$")
+        re_hostname = re.compile(r".*?<subordinate info>\s*?\[hostname\s*?\].*\[(.*?)\]$")
+        re_mac_addr = re.compile(r".*?<subordinate info>\s*?\[mac_eth0\s*?\].*\[(.*?)\]$")
+        re_pi_date = re.compile(r".*?<subordinate info>\s*?\[pi_time\s*?\].*\[(.*?)\]$")
 
         for f in files:
             record[f] = {}
@@ -159,7 +159,7 @@ class AutoJenkinsProvider(vcore.Provider):
             fsn_set = set()
             last_one_touch = False
             once_flag = False
-            slave_info_flag = 3 # there are three info should be picked.
+            subordinate_info_flag = 3 # there are three info should be picked.
 
             pass_times = 0
             fail_times = 0
@@ -197,21 +197,21 @@ class AutoJenkinsProvider(vcore.Provider):
                 if rs_fsn:
                     fsn_set.add(rs_fsn.group(1))
 
-                if slave_info_flag != 0:
+                if subordinate_info_flag != 0:
                     rs_hostname = re_hostname.match(line)
                     if rs_hostname:
                         record[f]['hostname'] = rs_hostname.group(1)
-                        slave_info_flag -= 1
+                        subordinate_info_flag -= 1
 
                     rs_mac_addr = re_mac_addr.match(line)
                     if rs_mac_addr:
                         record[f]['mac_addr'] = rs_mac_addr.group(1)
-                        slave_info_flag -= 1
+                        subordinate_info_flag -= 1
 
                     rs_pi_date  = re_pi_date.match(line)
                     if rs_pi_date:
                         record[f]['pi_date'] = rs_pi_date.group(1)
-                        slave_info_flag -= 1
+                        subordinate_info_flag -= 1
 
             record[f]['PASS_TIMES'] = pass_times
             record[f]['FAIL_TIMES'] = fail_times

@@ -15,7 +15,7 @@ from collections import defaultdict
 
 from .models import (Erds,TestCases,TestReports,
                      TestCampaign,ProjectSnapshot,
-                     SlaveStaticInfo, DutStaticInfo,
+                     SubordinateStaticInfo, DutStaticInfo,
                      TestHistory)
 
 import logging
@@ -1113,7 +1113,7 @@ class SnapshotDealer(QueryMixin):
 
 class DeviceStaticInfoManager:
     registered_devices_map = {
-        'slave_static_info': SlaveStaticInfo,
+        'subordinate_static_info': SubordinateStaticInfo,
         'dut_static_info': DutStaticInfo
     }
     def __init__(self, device_model, request_get=None):
@@ -1132,28 +1132,28 @@ class DeviceStaticInfoManager:
 
         return  remove_status
 
-    def slave_fields_update(self, slave):
+    def subordinate_fields_update(self, subordinate):
         for key, value in self.request_get.items():
             if key == "remove_status":
-                setattr(slave, key, self.remove_status_format())
+                setattr(subordinate, key, self.remove_status_format())
             else:
-                setattr(slave, key, value)
-        slave.save()
+                setattr(subordinate, key, value)
+        subordinate.save()
 
-    def get_available_slaves(self):
+    def get_available_subordinates(self):
         return list(self.device_model.objects.filter(remove_status=False).values())
 
-    def get_removed_slaves(self):
+    def get_removed_subordinates(self):
         return list(self.device_model.objects.filter(remove_status=True).values())
 
     def update_info(self):
         # if "id" passed, we only modify it, if no, that mean we need add one device.
         if "id" in self.request_get.keys():
-            slave_info = self.device_model.objects.get(id=int(self.request_get["id"]))
-            self.slave_fields_update(slave_info)
+            subordinate_info = self.device_model.objects.get(id=int(self.request_get["id"]))
+            self.subordinate_fields_update(subordinate_info)
         else:
-            new_slave = self.device_model(**self.request_get)
-            self.slave_fields_update(new_slave)
+            new_subordinate = self.device_model(**self.request_get)
+            self.subordinate_fields_update(new_subordinate)
 
 class TestHistoryDealer:
 
@@ -1164,7 +1164,7 @@ class TestHistoryDealer:
             to_save = {}
             to_save['test_date_on_pi'] = test_info['pi_date']
             to_save['hostname'] = test_info['hostname']
-            to_save['slave_mac_addr'] = test_info['mac_addr']
+            to_save['subordinate_mac_addr'] = test_info['mac_addr']
             to_save['FSN'] = ','.join(test_info['FSN'])
             to_save['case_name'] = case_name
             to_save['test_result'] = test_info['test_result']
