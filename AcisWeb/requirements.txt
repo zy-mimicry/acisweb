@@ -26,7 +26,7 @@ macropy3==1.1.0b2
 MarkupSafe==1.1.0
 matplotlib==3.0.2
 mpld3==0.3
-numpy==1.16.1
+numpy==1.22.0
 oauthlib==3.0.1
 parso==0.3.1
 pbr==5.1.1
